@@ -38,7 +38,7 @@ void img_write(texture img, const char* path);
 
 // Load a DDS from disk
 // TODO: Make this take a DDS buffer instead of a filename?
-texture image_buf_load(const char* filename, u8* img_buf);
+texture image_buf_load(const char* filename, u8* img_buf, u32 buf_size);
 
 #endif // #ifndef IMAGE_H
 

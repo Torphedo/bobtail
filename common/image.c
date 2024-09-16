@@ -218,7 +218,7 @@ bool is_dds(const char* filename) {
     return (magic == DDS_BEGIN);
 }
 
-texture image_buf_load(const char* filename, u8* img_buf) {
+texture image_buf_load(const char* filename, u8* img_buf, u32 buf_size) {
     texture img = {
         .data = img_buf,
         .width = 512,
@@ -234,10 +234,10 @@ texture image_buf_load(const char* filename, u8* img_buf) {
     }
 
     // 0xCC bytes separate pixels with missing data from black pixels
-    memset(img.data, 0xCC, sizeof(img_buf));
+    memset(img.data, 0xCC, buf_size);
     if (!is_dds(filename)) {
         // Load raw image data
-        file_load_existing(filename, img.data, sizeof(img_buf));
+        file_load_existing(filename, img.data, buf_size);
         return img;
     }
 

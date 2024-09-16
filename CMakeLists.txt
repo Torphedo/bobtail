@@ -6,7 +6,7 @@ option(BOBTAIL_OPENGL "Also compile OpenGL helpers like shader compilation wrapp
 option(BOBTAIL_TESTS "Build library unit tests")
 
 set(extra_sources )
-if (COMMON_OPENGL)
+if (BOBTAIL_OPENGL)
     set(extra_sources
         common/gl/gl_debug.c
         common/gl/gl_setup.c
