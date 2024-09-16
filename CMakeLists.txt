@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(common C)
+project(bobtail C)
 set(CMAKE_C_STANDARD 11)
 
 option(COMMON_OPENGL "Also compile OpenGL helpers like shader compilation wrappers. Requires GLFW, GLAD, and CGLM")
@@ -38,5 +38,5 @@ add_executable(test
     test/main.c
     test/test_list.c
 )
-target_include_directories(test PUBLIC ${CMAKE_SOURCE_DIR})
+target_include_directories(test PUBLIC ${bobtail_SOURCE_DIR})
 target_link_libraries(test PRIVATE common)
