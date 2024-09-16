@@ -14,7 +14,6 @@ static const u16 quad_indices[] = {
 
 
 extern model quad;
-extern model tex_quad; // Same as quad but with texture coords
 extern model cube;
 
 #endif // PRIMITIVES_H

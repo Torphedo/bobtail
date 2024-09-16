@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 #include <glad/glad.h>
+#include <common/int.h>
 
 // Shader code is specific to each GPU, so we have to store the GLSL source
 // code as a string and compile it at runtime. Loading the shaders from a file
