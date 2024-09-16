@@ -1,0 +1,6 @@
+out/
+cmake-*
+
+*.exe
+*.dll
+*.pdb
