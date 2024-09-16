@@ -1,6 +1,6 @@
 #ifndef VECTOR_H
 #define VECTOR_H
-#include "int.h"
+#include <common/int.h>
 #include <cglm/struct.h>
 
 void vec3_byteswap(vec3* v);

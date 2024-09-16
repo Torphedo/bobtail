@@ -1,5 +1,5 @@
+#include <common/endian.h>
 #include "vector.h"
-#include "endian.h"
 
 void vec3_byteswap(vec3* v) {
     // The byte swap is done in-place

@@ -4,8 +4,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "logging.h"
-#include "int.h"
+#include <common/logging.h>
+#include <common/int.h>
 #include "input.h"
 #include "gl_debug.h"
 
