@@ -33,6 +33,7 @@ add_library(common STATIC
     common/vmem.c
     ${extra_sources}
 )
+target_include_directories(common PUBLIC ${bobtail_SOURCE_DIR})
 
 if (BOBTAIL_TESTS)
     add_executable(test
