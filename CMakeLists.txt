@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.16)
 project(bobtail C)
 set(CMAKE_C_STANDARD 11)
 
-option(COMMON_OPENGL "Also compile OpenGL helpers like shader compilation wrappers. Requires GLFW, GLAD, and CGLM")
+option(BOBTAIL_OPENGL "Also compile OpenGL helpers like shader compilation wrappers. Requires GLFW, GLAD, and CGLM")
+option(BOBTAIL_TESTS "Build library unit tests")
 
 set(extra_sources )
 if (COMMON_OPENGL)
@@ -33,10 +34,12 @@ add_library(common STATIC
     ${extra_sources}
 )
 
-add_executable(test
-    ${test_sources}
-    test/main.c
-    test/test_list.c
-)
-target_include_directories(test PUBLIC ${bobtail_SOURCE_DIR})
-target_link_libraries(test PRIVATE common)
+if (BOBTAIL_TESTS)
+    add_executable(test
+        ${test_sources}
+        test/main.c
+        test/test_list.c
+    )
+    target_include_directories(test PUBLIC ${bobtail_SOURCE_DIR})
+    target_link_libraries(test PRIVATE common)
+endif()
