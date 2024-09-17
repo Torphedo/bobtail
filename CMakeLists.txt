@@ -32,7 +32,11 @@ add_library(common STATIC
     common/list.c
     common/queue.c
     common/vfile.c
-    common/vmem.c
+
+    # Files for other platforms will just be empty and compile instantly
+    common/vmem_posix.c
+    common/vmem_windows.c
+    common/vmem_switch.c
     ${extra_sources}
 )
 target_include_directories(common PUBLIC ${bobtail_SOURCE_DIR})

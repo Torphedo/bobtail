@@ -7,6 +7,7 @@
 ///
 /// PLATFORM_APPLE<br>
 /// PLATFORM_UNIX<br>
+/// PLATFORM_LINUX<br>
 /// PLATFORM_BSD<br>
 /// PLATFORM_POSIX<br>
 /// PLATFORM_WINDOWS<br>
@@ -24,6 +25,10 @@
     #include <sys/param.h>
     #ifdef BSD
         #define PLATFORM_BSD 1 
+    #endif
+
+    #if defined(__linux) || defined(__linux__)
+        #define PLATFORM_LINUX 1
     #endif
 
     #include <unistd.h>

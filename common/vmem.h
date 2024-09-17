@@ -15,6 +15,8 @@ enum {
     VMEM_PAGE_SIZE = 4096,
 };
 
+void* vmem_create_repeat_mapping(u32 page_count, u32 repeat_count);
+
 /// @brief Reserve a virtual memory region without committing any physical RAM.
 ///
 /// Only address space is reserved, and no space is reserved in the page table.
