@@ -11,21 +11,33 @@
 
 #include "int.h"
 
-/// @brief Reserve virtual memory without committing any physical RAM.
+enum {
+    VMEM_PAGE_SIZE = 4096,
+};
+
+/// @brief Reserve a virtual memory region without committing any physical RAM.
 ///
+/// Only address space is reserved, and no space is reserved in the page table.
+/// Before using any part of the memory, commit all or part of the region with
+/// vmem_commit(). You may be able to use the region without errors on some
+/// systems, but this isn't portable or guaranteed.
 /// @return Pointer to reserved region, or NULL on failure
 void* vmem_reserve(u64 size);
 
-/// @brief Commit physical memory to a virtual memory region. 
+/// @brief Commit physical memory to a virtual memory region.
 ///
-/// This does nothing on all platforms except Nintendo Switch, because writing
-/// to a reserved region automatically commits physical memory as needed.
+/// If successful, memory in the region becomes usable and space is reserved in
+/// the page file. Actual physical pages are only allocated as needed when
+/// parts of the committed region are accessed.
 /// @return 0 on success, -1 on failure.
 int vmem_commit(void* addr, u64 size);
 
 /// @brief Free a virtual memory region reserved with @ref vmem_reserve().
 ///
 /// This also frees physical memory committed to that region.
+/// @note Something I noticed in testing is that it can crash if you
+/// accidentally free a region larger than you reserved. When run under a
+/// debugger, it was fine. If you see this happen, make sure your sizes match!
 /// @return 0 on success, -1 on failure.
 int vmem_free(void* addr, u64 size);
 

@@ -43,6 +43,7 @@ if (BOBTAIL_TESTS)
         test/main.c
         test/test_list.c
         test/test_sha1.c
+        test/test_vmem.c
     )
     target_include_directories(test PUBLIC ${bobtail_SOURCE_DIR})
     target_link_libraries(test PRIVATE common)

@@ -7,18 +7,27 @@
 #include <sys/mman.h>
 
 void* vmem_reserve(u64 size) {
-    void* retval = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (retval == MAP_FAILED) {
-	// We need all implementations to return NULL on error for consistency
-	return NULL;
+  // MAP_ANONYMOUS tells it not to try to map a file into memory
+  // MAP_NORESERVE tells it not to reserve space in the page file
+  // (allows for larger-than-physical-memory reserved regions, of which only
+  // small parts are used)
+  void *retval = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE, -1, 0);
+  if (retval == MAP_FAILED) {
+    // We need all implementations to return NULL on error for consistency
+    return NULL;
     }
     return retval;
 }
 
 int vmem_commit(void* addr, u64 size) {
     // The kernel will automatically commit physical memory as needed when we
-    // write to the region.
-    return 0;
+    // write to the region. However, here we edit the existing mapping to let
+    // it reserve space in the page file.
+    void* retval = mmap(addr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (retval != MAP_FAILED) {
+	return 0;
+    }
+    return -1;
 }
 
 int vmem_free(void* addr, u64 size) {
@@ -30,20 +39,23 @@ int vmem_free(void* addr, u64 size) {
 #include <Windows.h>
 
 void* vmem_reserve(u64 size) {
-    return VirtualAlloc(NULL, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+    return VirtualAlloc(NULL, size, MEM_RESERVE, PAGE_READWRITE);
 }
+
 int vmem_commit(void* addr, u64 size) {
     // We reserve with MEM_RESERVE | MEM_COMMIT, so Windows will automatically
     // commit physical memory as needed when we write to the memory.
+    if (VirtualAlloc(addr, size, MEM_COMMIT, PAGE_READWRITE) == NULL) {
+	return -1; // Failure :(
+    }
     return 0;
 }
+
 int vmem_free(void* addr, u64 size) {
     if (VirtualFree(addr, 0, MEM_RELEASE)) {
         return 0;
     }
-    else {
-	return -1;
-    }
+    return -1;
 }
 #endif
 

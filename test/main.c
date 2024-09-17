@@ -5,11 +5,13 @@
 
 bool test_list();
 bool test_sha1();
+bool test_vmem();
 
 typedef bool (*testproc)(void);
 testproc tests[] = {
     test_list,
     test_sha1,
+    test_vmem,
 };
 
 int main() {
