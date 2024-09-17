@@ -1,52 +1,103 @@
 #ifndef LIST_H
 #define LIST_H
+/// @file list.h
+/// @brief Automatically expanding dynamic list
+
 #include <stddef.h>
 #include <stdbool.h>
 #include "int.h"
 
+/// @brief An automatically expanding dynamic list
 typedef struct {
-    // Base allocation & size
-    // We use a uintptr_t to avoid dereferencing void* which is an error on some platforms
+    /// @brief Backing buffer
+    ///
+    /// We use a uintptr_t so we can have a typeless pointer that can't
+    /// accidentally be dereferenced.
     uintptr_t data;
+    /// Current buffer size
     u32 alloc_size;
-    // Index of the next open slot in the array (not the last element!)
+    /// @brief Index of the next open slot in the array (not the last element!)
+    ///
+    /// @warning This isn't the index of the last element! It could be an
+    /// invalid index, or depending on the circumstances, invalid memory.
     u32 end_idx;
-    u32 element_size; // Size of each array element
+    /// Size of each array element
+    u32 element_size;
 }list;
 
-// Create a list.
-// init_size is allocation size in bytes, please try to align to [element_size]
-// The buffer is treated like an array, using [element_size] to index into it.
-// list of u16 has element_size 2, list of vec3f has element_size 12, etc.
+/// Create a list.
+/// @param init_size The allocation size in bytes. Please try to align to
+/// @p element_size
+///
+/// @param element_size Thinking of the list as an array, this is the expected
+/// size of each element.<br>
+/// A list of u16 has element_size 2, a list of vec3f has element_size 12, etc.
+///
+/// @return A newly initialized dynamic list.
+/// @note This allocates memory!
+/// @sa list_destroy
 list list_create(u32 init_size, u32 element_size);
 
-// Append an element to the list.
+/// @brief Free list data & fill all fields with 0
+///
+/// @param l List to destroy
+/// @sa list_create
+void list_destroy(list* l);
+
+/// @brief Append an element to the list.
+/// @param l The list to modify
+/// @param data The data to append. Must be at least @ref list.element_size
+/// bytes
+/// @note If the list is full, this can cause a re-allocation.
+/// @sa list_create()
 void list_add(list* l, const void* data);
 
-// We're forced to have this getter function to keep the list structure generic
-// Cast to your desired type and derefence.
+/// @brief Retrieve an element from the list.
+///
+/// @return Generic pointer to the element. This is our only option in C, since
+/// the @ref list structure is generic. You'll have to cast to the appropriate
+/// pointer type.
 void* list_get_element(list l, u32 idx);
 
-// Reset to initial state and fill buffer with 0. Does not free buffer.
+/// Reset list to initial state and fill buffer with 0. Does not free buffer.
 void list_clear(list* l);
 
-// Remove an element from the list. Every element after it is moved backwards.
+/// @brief Remove an element from the list.
+///
+/// @param l List to modify
+/// @param idx Index of element to remove
+/// @note This doesn't shift the entire list over by one element, as you might
+/// expect. Don't make any assumptions about element order.
 void list_remove(list* l, u32 idx);
 
-// Find and remove the first occurance of a value from the list.
+/// @brief Find and remove the first occurance of a value from the list.
+///
+/// @param l List to modify
+/// @param data Element to remove (Must be at least @ref list.element_size)
+/// @sa list_remove
+/// @sa list_find
 void list_remove_val(list* l, const void* data);
 
-// Add every element of [src] into [dest] (duplicates are allowed)
+/// @brief Append every element of @p src onto @p dest (duplicates are allowed)
+/// @param dest List to append to
+/// @param src List to copy data from
+/// @note If @p dest is full, this can cause a re-allocation.
 void list_merge(list* dest, list src);
 
-// Find the index of a value in the list. Returns -1 on failure.
+/// @brief Search for a value and return its index
+/// @param l List to search
+/// @param data Data to search for. Must be at least @ref list.element_size.
+/// @return Index of the data, or -1 on failure.
 s64 list_find(list l, const void* data);
 
-// Whether the list contains a certain value
+/// @brief Whether the list contains a certain value.
+/// @param l List to search
+/// @param data Data to search for. Must be at least @ref list.element_size.
+///
+/// @sa list_find
 bool list_contains(list l, const void* data);
 
-// Whether the list is empty
+/// @brief Whether the list is empty
 bool list_empty(list l);
 
 #endif // #ifndef LIST_H
-

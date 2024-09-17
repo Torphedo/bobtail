@@ -1,42 +1,56 @@
 #ifndef IMAGE_H
 #define IMAGE_H
+/// @file image.h
+/// @brief Utilities for handling raw and formatted image data
+
 #include <stdbool.h>
 #include "int.h"
 
+/// The compressed image format of a texture.
 typedef enum {
-    DXT1, // BC1
-    DXT3, // BC2
-    DXT5, // BC3
+    /// RGBA at 4 bits per pixel (8 bytes per 4x4 block), aka BC1
+    DXT1,
+    /// RGBA using DXT1/BC1 for the RGB, and uncompressed 4-bit alpha (uncommon, aka BC2)
+    DXT3,
+    /// RGBA using DXT1/BC1 for the RGB, and BC4 for the alpha (aka BC3)
+    DXT5,
+    /// Greyscale at 4 bits per pixel (8 bytes per 4x4 block)
     BC4,
+    /// Not a real enum value. Increment then modulo by this to cycle through formats
     DXT_ENUM_MAX,
 }img_fmt_compressed;
 
 enum {
-    // Width/height (in pixels) of a compressed texture block
+    /// Width/height (in pixels) of a compressed texture block
     COMPRESSED_BLK_DIM = 4,
 };
 
 typedef struct {
+    /// Raw image data
     u8* data;
     u16 width; // u16 is plenty for any image
     u16 height;
-    u16 mip_level; // And DEFINITELY for mips...
+    /// Number of mipmaps
+    u16 mip_level;
 
     bool compressed;
-    img_fmt_compressed fmt; // Compressed format
+    img_fmt_compressed fmt;
 
-    // Only used if uncompressed
-    u8 unit_size; // 0 = u8, 1 = u16, 2 = u32
+    /// @brief The size of each channel (Only used if uncompressed, see detailed description)
+    ///
+    /// 0 = u8, 1 = u16, 2 = u32
+    u8 unit_size;
+    /// @brief Number of uncompressed color channels
     u8 channels;
 }texture;
 
-// Round image dimensions down to some value
+/// Round image dimensions down to some value
 void img_snap(texture* img, u32 size);
 
-// Save an image to a DDS file
+/// Save an image to a DDS file
 void img_write(texture img, const char* path);
 
-// Load a DDS from disk
+/// Load a DDS from disk
 // TODO: Make this take a DDS buffer instead of a filename?
 texture image_buf_load(const char* filename, u8* img_buf, u32 buf_size);
 

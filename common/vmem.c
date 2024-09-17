@@ -6,13 +6,22 @@
 #if defined(PLATFORM_UNIX) || defined(PLATFORM_APPLE)
 #include <sys/mman.h>
 
-void* virtual_reserve(u64 size) {
-    return mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+void* vmem_reserve(u64 size) {
+    void* retval = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (retval == MAP_FAILED) {
+	// We need all implementations to return NULL on error for consistency
+	return NULL;
+    }
+    return retval;
 }
-int virtual_commit(void* addr, u64 size) {
+
+int vmem_commit(void* addr, u64 size) {
+    // The kernel will automatically commit physical memory as needed when we
+    // write to the region.
     return 0;
 }
-int virtual_free(void* addr, u64 size) {
+
+int vmem_free(void* addr, u64 size) {
     return munmap(addr, size);
 }
 #endif
@@ -20,15 +29,15 @@ int virtual_free(void* addr, u64 size) {
 #ifdef PLATFORM_WINDOWS
 #include <Windows.h>
 
-void* virtual_reserve(u64 size) {
+void* vmem_reserve(u64 size) {
     return VirtualAlloc(NULL, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 }
-int virtual_commit(void* addr, u64 size) {
+int vmem_commit(void* addr, u64 size) {
     // We reserve with MEM_RESERVE | MEM_COMMIT, so Windows will automatically
     // commit physical memory as needed when we write to the memory.
     return 0;
 }
-int virtual_free(void* addr, u64 size) {
+int vmem_free(void* addr, u64 size) {
     if (VirtualFree(addr, 0, MEM_RELEASE)) {
         return 0;
     }
@@ -38,9 +47,9 @@ int virtual_free(void* addr, u64 size) {
 }
 #endif
 
-// Reserving / committing doesn't really exist as a kernel concept on HorizonOS
-// (Switch). We'll probably have to fake this behaviour by doing re-allocation
-// and copying behind the scenes to get it to work.
+// Reserve / commit doesn't really exist as a kernel concept in HorizonOS
+// (Switch). However, this behaviour can be emulated in userspace with the help
+// of libnx.
 #ifdef PLATFORM_SWITCH
 #include <switch/kernel/virtmem.h>
 
@@ -56,7 +65,7 @@ struct ReservationMapping {
 
 static ReservationMapping* g_ReservationMappings;
 
-void* virtual_reserve(u64 size) {
+void* vmem_reserve(u64 size) {
 	virtmemLock();
 	void* addr = virtmemFindAslr(size, 0);
 	VirtmemReservation* reservation = virtmemAddReservation(addr, size);
@@ -73,7 +82,7 @@ void* virtual_reserve(u64 size) {
 
 	return addr;
 }
-int virtual_commit(void* addr, u64 size) {
+int vmem_commit(void* addr, u64 size) {
 	virtmemLock();
 	VirtmemReservation* reservation = virtmemAddReservation(addr, size);
 	virtmemUnlock();
@@ -92,7 +101,7 @@ int virtual_commit(void* addr, u64 size) {
 	else
 		return -1;
 }
-int virtual_free(void* addr, u64 size) {
+int vmem_free(void* addr, u64 size) {
 	VirtmemReservation* reservation;
 
 	for (ReservationMapping* reservationMapping = g_ReservationMappings; reservationMapping; reservationMapping = reservationMapping->next) {

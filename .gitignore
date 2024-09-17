@@ -1,6 +1,10 @@
 out/
 cmake-*
 
+# Doxygen stuff
+html/
+latex/
+
 *.exe
 *.dll
 *.pdb

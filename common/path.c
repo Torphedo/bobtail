@@ -38,6 +38,8 @@ void path_fix_backslashes(char* path) {
     }
 }
 
+// TODO: We should just have a function that replaces all of 1 character with
+// another. Having 2 functions for this is a little ridiculous.
 void path_fix_forward_slashes(char* path) {
     u16 pos = strlen(path) - 1; // Subtract 1 so that we don't need to check null terminator
     while (pos > 0) {
@@ -49,7 +51,10 @@ void path_fix_forward_slashes(char* path) {
 }
 
 bool path_has_slashes(const char* path) {
-    s64 pos = strlen(path) - 1; // Subtract 1 so that we don't need to check null terminator
+    s64 pos = strlen(path) - 1; // Subtract 1 so we don't check null terminator
+
+    // Honestly, I'm pretty sure the main reason for looping backwards here is
+    // that I just copied the loop from another function
     while (pos >= 0) {
         if (path[pos] == '\\' || path[pos] == '/') {
             return true;
@@ -62,7 +67,9 @@ bool path_has_slashes(const char* path) {
 }
 
 void path_truncate(char* path, u16 pos) {
-    path[--pos] = 0; // Removes last character to take care of trailing "\\" or "/".
+    path[--pos] = 0; // Removes last character in case of trailing '\\' or '/'.
+
+    // Delete characters until we hit the first slash
     while(path[pos] != '\\' && path[pos] != '/' && pos >= 0) {
         path[pos--] = 0;
     }
@@ -70,11 +77,11 @@ void path_truncate(char* path, u16 pos) {
 
 void path_get_filename(const char* path, char* output) {
     u16 pos = strlen(path);
+    // Loop backwards until we find the first slash
     while(path[pos] != '\\' && path[pos] != '/') {
         pos--;
     }
-    strcpy(output, &path[pos] + 1);
-
+    strcpy(output, &path[pos + 1]);
 }
 
 char* get_self_path(const char* argv_0) {

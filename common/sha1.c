@@ -1,4 +1,5 @@
-// Modified from the sha1.c in RFC 3171.
+// This file is derived from the public domain C code in RFC 3171, and is also
+// released into the public domain.
 // SHA-1 produces a 20-byte message digest for any byte stream.
 //
 // The context-based API has been replaced with a simple API taking a buffer to
@@ -38,13 +39,13 @@ bool SHA1_equal(sha1_digest x, sha1_digest y) {
 }
 
 bool SHA1_blank(sha1_digest x) {
-    sha1_digest empty = {0};
-    return (memcmp(&x, &empty, sizeof(x)) == 0);
+    const sha1_digest empty = {0};
+    return SHA1_equal(x, empty);
 }
 
 void SHA1_print(sha1_digest x) {
     for (u32 i = 0; i < SHA1_HASH_SIZE; i++) {
-        printf("%02x", x.bytes[i]);
+        printf("%02X", x.bytes[i]);
     }
 }
 
@@ -124,7 +125,7 @@ int SHA1Input(SHA1Context* context, const u8* message_array, u32 length) {
 
 // Process the next 512 bits of the message in msg_block
 void SHA1ProcessMessageBlock(SHA1Context *context) {
-    const uint32_t K[] = { // Constants defined in SHA-1
+    const u32 K[] = { // Constants defined in SHA-1
             0x5A827999,
             0x6ED9EBA1,
             0x8F1BBCDC,
@@ -237,6 +238,8 @@ void SHA1PadMessage(SHA1Context *context) {
 }
 
 sha1_digest SHA1_buf(u8* buf, u64 len) {
+    // This is a wrapper around the original API designed around streaming data.
+    // Since we only have 1 buffer, we only call SHA1Input once.
     SHA1Context ctx = SHA1_Init();
     sha1_digest out = {0};
     SHA1Input(&ctx, buf, len);

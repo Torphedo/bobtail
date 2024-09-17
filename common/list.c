@@ -27,6 +27,14 @@ list list_create(u32 init_size, u32 element_size) {
     };
 }
 
+void list_destroy(list* l) {
+    void* data = (void*)l->data;
+    *l = (list){0};
+
+    // This order of operations makes sure there's never a dangling pointer.
+    free((void*)data);
+}
+
 void list_add(list* l, const void* data) {
     // If there's no room, we need to realloc
     if (list_full(*l)) {
@@ -109,4 +117,3 @@ void list_clear(list* l) {
 bool list_empty(list l) {
     return (l.end_idx == 0);
 }
-

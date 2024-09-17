@@ -1,5 +1,7 @@
 #ifndef INPUT_H
 #define INPUT_H
+/// @file input.h
+/// @brief Input state & polling callbacks
 
 #include <stdbool.h>
 
@@ -18,8 +20,9 @@
 // that the key appears held the entire time.
 
 
-// Gamepad button inputs (no hat switches)
-// Using standard Xbox mapping like GLFW
+/// @brief Gamepad button inputs (no hat switches)
+///
+/// Using standard Xbox mapping like GLFW
 typedef struct {
     bool a: 1;
     bool b: 1;
@@ -40,6 +43,7 @@ typedef struct {
 }gamepad_t;
 
 // Using a bitfield takes it from ~145 bytes to ~36 bytes (at time of writing)
+/// @brief Complete input state for the keyboard, mouse, and controller(s)
 typedef struct {
     bool space: 1;
     bool apostrophe: 1;
@@ -185,17 +189,28 @@ typedef struct {
     gamepad_t gp;
 }input_internal;
 
-// The global input struct our callback will update
+/// Globally accessible current input data
 extern input_internal input;
+
+/// Deadzone for controllers
 static const float deadzone = 0.25f;
 
-// GLFW callbacks for all kinds of input
+/// GLFW callback triggered on keyboard input
 void input_update(GLFWwindow* window, int key, int scancode, int actions, int mods);
+
+/// GLFW callback triggered on mouse input
 void cursor_update(GLFWwindow* window, double xpos, double ypos);
+
+/// GLFW callback triggered on scroll wheel input
 void scroll_update(GLFWwindow* window, double x, double y);
+
+/// GLFW callback triggered on mouse button press
 void mouse_button_update(GLFWwindow* window, int button, int action, int mods);
+
+/// Update modifier keys (shift, control, alt)
 void update_mods(GLFWwindow* window);
 
+/// Collect gamepad state from up to 16 connected controllers
 void gamepad_update();
 
 #endif // INPUT_H

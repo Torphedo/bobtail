@@ -1,5 +1,7 @@
 #ifndef PRIMITIVES_H
 #define PRIMITIVES_H
+/// @file primitives.h
+/// @brief Simple predefined 3D shapes (like cubes)
 
 #include "model.h"
 enum {

@@ -1,5 +1,18 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
+/// @file platform.h
+/// @brief Simple definitions to find out the target platform
+///
+/// Possible platform definitions are:<br>
+///
+/// PLATFORM_APPLE<br>
+/// PLATFORM_UNIX<br>
+/// PLATFORM_BSD<br>
+/// PLATFORM_POSIX<br>
+/// PLATFORM_WINDOWS<br>
+/// PLATFORM_SWITCH (Nintendo Switch)<br>
+///
+/// These will all be a constant 1 if defined.
 
 #if (defined(__APPLE__) && defined(__MACH__))
     #define PLATFORM_APPLE 1
