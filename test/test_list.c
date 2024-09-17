@@ -32,12 +32,25 @@ bool test_list() {
         printf("ADD: end_idx not incremented correctly!\n");
         result = false;
     }
+    // There's not really a good way to test add without relying on get
     if (*(u16*)list_get_element(l, 0) != val) {
-        printf("ADD: element not inserted correctly!\n");
+        printf("ADD: element not inserted or GET is broken!\n");
         result = false;
     }
     if(l.alloc_size != 4) {
         printf("ADD: unnecessary realloc!\n");
+        result = false;
+    }
+
+    // Make sure searching works
+    const u16 searchval = 42;
+    if (list_contains(l, &searchval)) {
+        printf("CONTAINS: false positive!\n");
+        result = false;
+    }
+
+    if (!list_contains(l, &val)) {
+        printf("CONTAINS: Value that exists wasn't found!\n");
         result = false;
     }
 

@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project(bobtail C)
 set(CMAKE_C_STANDARD 11)
+# Emit a compile_commands.json for use with clangd in LSPs
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
 option(BOBTAIL_OPENGL "Also compile OpenGL helpers like shader compilation wrappers. Requires GLFW, GLAD, and CGLM")
 option(BOBTAIL_TESTS "Build library unit tests")
@@ -40,6 +42,7 @@ if (BOBTAIL_TESTS)
         ${test_sources}
         test/main.c
         test/test_list.c
+        test/test_sha1.c
     )
     target_include_directories(test PUBLIC ${bobtail_SOURCE_DIR})
     target_link_libraries(test PRIVATE common)
