@@ -13,14 +13,15 @@ void* vmem_create_repeat_mapping(u32 page_count, u32 repeat_count) {
     // To trick mmap() into mapping the same region to consecutive virtual
     // regions, we create a virtual (in-memory) file as a backing buffer.
     const char* vfile_name = "_repeatmap_vfile";
+    const u32 vfile_size = VMEM_PAGE_SIZE * page_count;
     // If we crashed during this function or something, the file could be left
     // behind in memory from a previous run, so we delete it first.
     shm_unlink(vfile_name);
     int ramfile = shm_open(vfile_name, O_RDWR | O_CREAT, 0);
-    ftruncate(ramfile, VMEM_PAGE_SIZE * page_count); // Extend the file to this size
+    ftruncate(ramfile, vfile_size); // Extend the file to this size
 
     // Reserve enough virtual address space to hold the whole repeat mapping
-    const u32 mapping_size = VMEM_PAGE_SIZE * page_count * repeat_count;
+    const u32 mapping_size = vfile_size * repeat_count;
     void* mapbase = mmap(NULL, mapping_size, PROT_NONE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
     if (mapbase == NULL) {
         return NULL;
@@ -29,7 +30,7 @@ void* vmem_create_repeat_mapping(u32 page_count, u32 repeat_count) {
     // Map the same virtual file multiple times into adjacent virtual pages,
     // so that writing to one mapping affects all of them
     for (u32 i = 0; i < repeat_count; i++) {
-        const uintptr_t offset = i * VMEM_PAGE_SIZE * page_count;
+        const uintptr_t offset = i * vfile_size;
         void* cur_map_pos = (void*)((uintptr_t)mapbase + offset);
         void* mapping = mmap(cur_map_pos, page_count * VMEM_PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_FIXED | MAP_SHARED, ramfile, 0);
         if (mapping == MAP_FAILED) {
