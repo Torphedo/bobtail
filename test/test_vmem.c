@@ -10,11 +10,13 @@ static const u64 gigabytes_500 = 0x7D00000000;
 bool test_vmem() {
     bool result = true;
 
-    // Create a ring/repeat mapping, where one 3-page buffer is repeated 5
-    // times in virtual memory. Modifying any of these 5 "views" into the
+    // Create a ring/repeat mapping, where one buffer is repeated many
+    // times in virtual memory. Modifying any of these "views" into the
     // underlying buffer reflects the change in all views.
-    const u32 ring_size = 3 * VMEM_ALLOC_GRANULARITY;
-    u8* ringmap = vmem_create_repeat_mapping(3, 5);
+    const u32 ring_size = 8 * VMEM_ALLOC_GRANULARITY;
+    const u32 ring_count = 5;
+    u8* ringmap = vmem_create_repeat_mapping(8, ring_count);
+
     if (ringmap == NULL) {
         printf("Failed to create ring mapping!\n");
         result = false;

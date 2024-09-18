@@ -20,7 +20,10 @@ void* vmem_create_repeat_mapping(u32 ring_width, u32 repeat_count) {
     ftruncate(ramfile, VMEM_ALLOC_GRANULARITY * ring_width); // Extend the file to this size
 
     // Reserve enough virtual address space to hold the whole repeat mapping
-    const u64 mapping_size = VMEM_ALLOC_GRANULARITY * ring_width * repeat_count;
+    const u64 mapping_size = (u64)VMEM_ALLOC_GRANULARITY * (u64)ring_width * (u64)repeat_count;
+    if (mapping_size == 0) {
+        printf("Likely integer overflow or bad user input!\n");
+    }
     void* mapbase = mmap(NULL, mapping_size, PROT_NONE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
     if (mapbase == NULL) {
         return NULL;
@@ -29,7 +32,7 @@ void* vmem_create_repeat_mapping(u32 ring_width, u32 repeat_count) {
     // Map the same virtual file multiple times into adjacent virtual pages,
     // so that writing to one mapping affects all of them
     for (u32 i = 0; i < repeat_count; i++) {
-        const uintptr_t offset = i * VMEM_ALLOC_GRANULARITY * ring_width;
+        const uintptr_t offset = (u64)i * (u64)VMEM_ALLOC_GRANULARITY * (u64)ring_width;
         void* cur_map_pos = (void*)((uintptr_t)mapbase + offset);
         void* mapping = mmap(cur_map_pos, ring_width * VMEM_ALLOC_GRANULARITY, PROT_READ | PROT_WRITE, MAP_FIXED | MAP_SHARED, ramfile, 0);
         if (mapping == MAP_FAILED) {
