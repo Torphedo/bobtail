@@ -13,7 +13,7 @@ bool test_vmem() {
     // Create a ring/repeat mapping, where one 3-page buffer is repeated 5
     // times in virtual memory. Modifying any of these 5 "views" into the
     // underlying buffer reflects the change in all views.
-    const u32 ring_size = 3 * VMEM_PAGE_SIZE;
+    const u32 ring_size = 3 * VMEM_ALLOC_GRANULARITY;
     u8* ringmap = vmem_create_repeat_mapping(3, 5);
     if (ringmap == NULL) {
         printf("Failed to create ring mapping!\n");
@@ -27,6 +27,7 @@ bool test_vmem() {
         printf("Ring mapping isn't working!\n");
         result = false;
     }
+    vmem_destroy_repeat_mapping(ringmap, 3, 5);
 
     u8* region = vmem_reserve(gigabytes_500);
     if (region == NULL) {
@@ -34,7 +35,7 @@ bool test_vmem() {
         result = false;
     }
     if (vmem_commit(region, VMEM_PAGE_SIZE * 5000) == -1) {
-        printf("Failed to commit region!\n");
+        printf("Failed to commit 500GiB region!\n");
         result = false;
     }
 

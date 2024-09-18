@@ -9,19 +9,18 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 
-void* vmem_create_repeat_mapping(u32 page_count, u32 repeat_count) {
+void* vmem_create_repeat_mapping(u32 ring_width, u32 repeat_count) {
     // To trick mmap() into mapping the same region to consecutive virtual
     // regions, we create a virtual (in-memory) file as a backing buffer.
     const char* vfile_name = "_repeatmap_vfile";
-    const u32 vfile_size = VMEM_PAGE_SIZE * page_count;
     // If we crashed during this function or something, the file could be left
     // behind in memory from a previous run, so we delete it first.
     shm_unlink(vfile_name);
     int ramfile = shm_open(vfile_name, O_RDWR | O_CREAT, 0);
-    ftruncate(ramfile, vfile_size); // Extend the file to this size
+    ftruncate(ramfile, VMEM_ALLOC_GRANULARITY * ring_width); // Extend the file to this size
 
     // Reserve enough virtual address space to hold the whole repeat mapping
-    const u32 mapping_size = vfile_size * repeat_count;
+    const u64 mapping_size = VMEM_ALLOC_GRANULARITY * ring_width * repeat_count;
     void* mapbase = mmap(NULL, mapping_size, PROT_NONE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
     if (mapbase == NULL) {
         return NULL;
@@ -30,9 +29,9 @@ void* vmem_create_repeat_mapping(u32 page_count, u32 repeat_count) {
     // Map the same virtual file multiple times into adjacent virtual pages,
     // so that writing to one mapping affects all of them
     for (u32 i = 0; i < repeat_count; i++) {
-        const uintptr_t offset = i * vfile_size;
+        const uintptr_t offset = i * VMEM_ALLOC_GRANULARITY * ring_width;
         void* cur_map_pos = (void*)((uintptr_t)mapbase + offset);
-        void* mapping = mmap(cur_map_pos, page_count * VMEM_PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_FIXED | MAP_SHARED, ramfile, 0);
+        void* mapping = mmap(cur_map_pos, ring_width * VMEM_ALLOC_GRANULARITY, PROT_READ | PROT_WRITE, MAP_FIXED | MAP_SHARED, ramfile, 0);
         if (mapping == MAP_FAILED) {
             return NULL;
         }
@@ -42,6 +41,11 @@ void* vmem_create_repeat_mapping(u32 page_count, u32 repeat_count) {
     // and our mappings aren't affected.
     shm_unlink(vfile_name);
     return mapbase;
+}
+
+void vmem_destroy_repeat_mapping(void* base_addr, u32 ring_width, u32 repeat_count) {
+    u64 size = ring_width * VMEM_ALLOC_GRANULARITY * repeat_count;
+    munmap(base_addr, size);
 }
 
 void* vmem_reserve(u64 size) {
@@ -63,7 +67,7 @@ int vmem_commit(void* addr, u64 size) {
     // it reserve space in the page file.
     void* retval = mmap(addr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (retval != MAP_FAILED) {
-	return 0;
+	    return 0;
     }
     return -1;
 }

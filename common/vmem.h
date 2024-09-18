@@ -12,10 +12,13 @@
 #include "int.h"
 
 enum {
-    VMEM_PAGE_SIZE = 4096,
+    VMEM_PAGE_SIZE = 4 * 1024,
+    VMEM_ALLOC_GRANULARITY = 64 * 1024,
 };
 
-void* vmem_create_repeat_mapping(u32 page_count, u32 repeat_count);
+void* vmem_create_repeat_mapping(u32 ring_width, u32 repeat_count);
+
+void vmem_destroy_repeat_mapping(void* base_addr, u32 ring_width, u32 repeat_count);
 
 /// @brief Reserve a virtual memory region without committing any physical RAM.
 ///
