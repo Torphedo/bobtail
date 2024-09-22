@@ -12,10 +12,16 @@
 #include <glad/glad.h>
 #include <common/int.h>
 
-/// Ensure the shader program linked correctly, printing error messages if needed
+/// @brief Ensure the shader program linked correctly
+/// @param shader OpenGL shader resource ID
+/// @note This can allocate CPU memory, in the rare case that the shader
+/// compiler log is extremely long (>8KiB).
 bool shader_link_check(gl_obj shader);
 
 /// @brief Compile a shader from GLSL source in-memory
+/// @note This creates OpenGL resources that need to be freed later.
+///
+/// @param src GLSL shader source code
 /// @param shader_type GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, or GL_GEOMETRY_SHADER
 /// @return shader id for OpenGL, or 0 on failure
 gl_obj shader_compile_src(const char* src, GLenum shader_type);
@@ -23,6 +29,7 @@ gl_obj shader_compile_src(const char* src, GLenum shader_type);
 /// @brief A wrapper to compile & link a whole shader program at once.
 ///
 /// You should call shader_link_check() afterwards in case of failure.
+/// @note This creates OpenGL resources that need to be freed later.
 /// @param vert_src GLSL source code for the vertex shader
 /// @param frag_src GLSL source code for the fragment shader
 /// @return shader program id for OpenGL, or 0 on failure

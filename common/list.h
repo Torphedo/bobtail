@@ -2,12 +2,22 @@
 #define LIST_H
 /// @file list.h
 /// @brief Automatically expanding dynamic list
+/// @warning Don't keep pointers / indices to elements of the list for any
+/// longer than necessary! They are liable to point to different data or
+/// freed/invalid memory if the list is modified. Any function taking a pointer
+/// to the list can and will modify any part of it.
+/// @sa queue.h
 
 #include <stddef.h>
 #include <stdbool.h>
 #include "int.h"
 
 /// @brief An automatically expanding dynamic list
+/// @warning Don't keep pointers / indices to elements of the list for any
+/// longer than necessary! They are liable to point to different data or
+/// freed/invalid memory if the list is modified. Any function taking a pointer
+/// to the list can and will modify any part of it.
+/// @sa queue
 typedef struct {
     /// @brief Backing buffer
     ///
@@ -48,7 +58,7 @@ void list_destroy(list* l);
 /// @param l The list to modify
 /// @param data The data to append. Must be at least @ref list.element_size
 /// bytes
-/// @note If the list is full, this can cause a re-allocation.
+/// @note This allocates memory if the list is full.
 /// @sa list_create()
 void list_add(list* l, const void* data);
 
@@ -81,7 +91,7 @@ void list_remove_val(list* l, const void* data);
 /// @brief Append every element of @p src onto @p dest (duplicates are allowed)
 /// @param dest List to append to
 /// @param src List to copy data from
-/// @note If @p dest is full, this can cause a re-allocation.
+/// @note This allocates memory if the @p dest list can't hold the new data.
 void list_merge(list* dest, list src);
 
 /// @brief Search for a value and return its index

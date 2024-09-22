@@ -14,9 +14,9 @@ void program_print_log(gl_obj shader) {
     s32 log_size = 0;
     glGetProgramiv(shader, GL_INFO_LOG_LENGTH, &log_size);
     
-    char log_buf[0x1000] = {0};
+    char log_buf[0x2000] = {0};
 
-    // If the log is really long (> 4KiB), it won't fit in our stack array.
+    // If the log is really long, it won't fit in our stack array.
     if (log_size > sizeof(log_buf)) {
         LOG_MSG(warning, "Abnormally large log (%d bytes) forced a heap allocation.\n", log_size);
         // Allocate enough space to store the log

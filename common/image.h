@@ -25,6 +25,11 @@ enum {
     COMPRESSED_BLK_DIM = 4,
 };
 
+// TODO: The texture structure is effectively just a simplified DDS header. We
+// should replace image saving/loading code with 2 simple functions to convert
+// texture struct <-> DDS header. The caller can easily write a DDS file from
+// that, and the library code becomes decoupled from the file I/O.
+// (extended headers might be tough, though).
 typedef struct {
     /// Raw image data
     u8* data;
@@ -51,7 +56,6 @@ void img_snap(texture* img, u32 size);
 void img_write(texture img, const char* path);
 
 /// Load a DDS from disk
-// TODO: Make this take a DDS buffer instead of a filename?
 texture image_buf_load(const char* filename, u8* img_buf, u32 buf_size);
 
 #endif // #ifndef IMAGE_H

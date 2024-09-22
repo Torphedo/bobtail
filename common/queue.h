@@ -1,8 +1,20 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 /// @file queue.h
-/// @brief an auto-expanding dynamic queue implementation
+/// @brief An auto-expanding dynamic queue implementation
+///
+/// Unlike the dynamic @ref list, this structure isn't really generic yet. Its
+/// type can be changed by editing the typedef of @ref queue_element at compile
+/// time, but there's no way to have multiple queues of multiple different
+/// types in one program.
+///
+/// @warning Don't keep pointers / indices to elements of the queue for any
+/// longer than necessary! They are liable to point to different data or
+/// freed/invalid memory if the queue is modified. Any function taking a
+/// pointer to the queue can and will modify any part of it.
+/// @sa list.h
 
+#include <stdbool.h>
 #include "int.h"
 
 // TODO: Make this structure generic like the dynamic list.
@@ -12,10 +24,11 @@ typedef u64 queue_element;
 
 /// @brief An automatically expanding dynamic queue
 ///
-/// Unlike the dynamic @ref list, this structure isn't really generic yet. Its
-/// type can be changed by editing the typedef of @ref queue_element at compile
-/// time, but there's no way to have multiple queues of multiple different
-/// types in one program.
+/// @warning Don't keep pointers / indices to elements of the queue for any
+/// longer than necessary! They are liable to point to different data or
+/// freed/invalid memory if the queue is modified. Any function taking a
+/// pointer to the queue can and will modify any part of it.
+/// @sa list
 typedef struct {
     /// @brief Backing buffer
     queue_element* data;
@@ -34,7 +47,7 @@ typedef struct {
 queue queue_create(u32 init_size);
 
 /// @brief Add an element to the back of the queue.
-/// @note If the backing buffer is full, this can allocate memory
+/// @note If the backing buffer is full, this can allocate memory.
 void queue_add(queue* q, queue_element val);
 
 /// Remove the element at the front of the queue, and return it.

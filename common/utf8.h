@@ -121,7 +121,7 @@ static utf8 codepoint_to_utf8(u32 codepoint) {
 }
 
 /// @brief Given a UTF-8 string, find the next Unicode codepoint & its length.
-/// @param bytes A UTF-8 character or string
+/// @param bytes A UTF-8 character or string. 1-4 bytes are read.
 /// @param length_out Output variable indicating how many bytes you should
 /// advance in the UTF-8 string. Will always be between 1 and 4 (inclusive).
 /// May be NULL.
