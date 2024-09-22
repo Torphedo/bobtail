@@ -332,6 +332,7 @@ void update_mods(GLFWwindow* window) {
     input.left_control = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL);
     input.right_control = glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL);
     input.control = input.left_control | input.right_control;
+    input.alt = glfwGetKey(window, GLFW_KEY_LEFT_ALT) | glfwGetKey(window, GLFW_KEY_RIGHT_ALT);
 }
 
 void gamepad_update() {
