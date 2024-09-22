@@ -8,6 +8,7 @@
 #include "vmem.h"
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <stdio.h>
 
 void* vmem_create_repeat_mapping(u32 ring_width, u32 repeat_count) {
     // To trick mmap() into mapping the same region to consecutive virtual
