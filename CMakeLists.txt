@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.13)
 project(bobtail C)
 set(CMAKE_C_STANDARD 11)
 # Emit a compile_commands.json for use with clangd in LSPs
