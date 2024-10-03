@@ -45,7 +45,7 @@ void mask_set(u8* mask, u8 idx, u8 val);
 s32 s24_to_s32(u8* addr);
 
 /// Raise a number to a power (val^pow)
-u32 exponent(u32 val, u8 pow);
+u64 exponent(u32 val, u8 pow);
 
 /// Print a 16-bit string as if it were 8-bit (portable, unlike %ws)
 void print_c16s(const c16* str);

@@ -41,8 +41,8 @@ s32 s24_to_s32(u8* addr) {
     return val;
 }
 
-u32 exponent(u32 val, u8 pow) {
-    u32 out = val;
+u64 exponent(u32 val, u8 pow) {
+    u64 out = val;
     for (u8 i = 1; i < pow; i++) {
         out *= val;
     }

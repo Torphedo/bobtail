@@ -5,8 +5,6 @@
 
 #include "testing.h"
 
-static const u64 gigabytes_500 = 0x7D00000000;
-
 bool test_vmem() {
     bool result = true;
 
@@ -29,15 +27,20 @@ bool test_vmem() {
         printf("Ring mapping isn't working!\n");
         result = false;
     }
-    vmem_destroy_repeat_mapping(ringmap, 3, 5);
+    vmem_destroy_repeat_mapping(ringmap, 8, 5);
 
-    u8* region = vmem_reserve(gigabytes_500);
+    // A 39-bit region is 512 GiB of address space
+    const u64 region_size = exponent(2, 39);
+    u8* region = vmem_reserve(region_size);
     if (region == NULL) {
-        printf("Failed to reserve 500GiB region!\n");
+        printf("Failed to reserve %luGiB region!\n", region_size / exponent(1024, 3));
         result = false;
     }
+
+    // This causes reservations in the pagefile, so we can't go too crazy with
+    // committing.
     if (vmem_commit(region, VMEM_PAGE_SIZE * 5000) == -1) {
-        printf("Failed to commit 500GiB region!\n");
+        printf("Failed to commit %luGiB region!\n", region_size / exponent(1024, 3));
         result = false;
     }
 
@@ -51,7 +54,13 @@ bool test_vmem() {
     region[10000000] = 20;
     region[20000000] = 20;
 
-    vmem_free(region, gigabytes_500);
+    // If a segfault happens here, the platform probably requires us to commit
+    // before writing.
+    for (u8 i = 0; i < 39; i++) {
+        region[exponent(2, i)] = 50;
+    }
+    vmem_free(region, region_size);
+
     REPORT_RESULT(result);
     return result;
 }
