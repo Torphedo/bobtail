@@ -5,12 +5,12 @@
 #include "logging.h"
 #include "queue.h"
 
-u32 queue_maxidx(queue q) {
+s32 queue_maxidx(queue q) {
     return (q.alloc_size / sizeof(*q.data)) - 1;
 }
 
 bool queue_fullback(queue q) {
-    return q.back_idx >= queue_maxidx(q);
+    return q.back_idx >= queue_maxidx(q) || queue_maxidx(q) < 0;
 }
 
 bool queue_fullfront(queue q) {
@@ -43,7 +43,7 @@ queue queue_create(u32 init_size) {
 void queue_add(queue* q, queue_element val) {
     // If there's no room in the back
     if (queue_fullback(*q)) {
-        if (!queue_fullfront(*q)) {
+        if (!queue_fullfront(*q) && q->data != NULL) {
             // We have open space at the front, so it can be transparently
             // reclaimed to make room for the new value.
             const u32 size = (q->back_idx - q->front_idx) * sizeof(*q->data);
@@ -79,7 +79,12 @@ void queue_add(queue* q, queue_element val) {
 }
 
 queue_element queue_get(queue* q) {
-    queue_element val = q->data[q->front_idx++];
+    // We can't get a value if there's not enough buffer space for the read
+    if (q->alloc_size < sizeof(queue_element) || q->data == NULL) {
+        return 0;
+    }
+
+    const queue_element val = q->data[q->front_idx++];
 
     // If this was the last item, reset so the entire buffer can be re-used.
     if (q->front_idx == q->back_idx) {

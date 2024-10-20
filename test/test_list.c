@@ -4,14 +4,16 @@
 
 #include "testing.h"
 
-#define TEST_EXIT(file, result) fclose(f); REPORT_RESULT(result); return result
-
 bool test_list() {
     bool result = true;
 
     // Test basic list creation
     const u32 alloc_size = 4;
     list l = list_create(alloc_size, sizeof(u16));
+    if ((void*)l.data == NULL) {
+        printf("CREATE: Initial alloc failed!\n");
+        return false;
+    }
     if (l.end_idx != 0) {
         printf("CREATE: end idx init wrong!\n");
         result = false;

@@ -52,6 +52,7 @@ if (BOBTAIL_TESTS)
         ${test_sources}
         test/main.c
         test/test_list.c
+        test/test_queue.c
         test/test_sha1.c
         test/test_vmem.c
     )

@@ -4,12 +4,14 @@
 #include <common/logging.h>
 
 bool test_list();
+bool test_queue();
 bool test_sha1();
 bool test_vmem();
 
 typedef bool (*testproc)(void);
 testproc tests[] = {
     test_list,
+    test_queue,
     test_sha1,
     test_vmem,
 };
