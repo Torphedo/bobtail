@@ -49,11 +49,11 @@ static const uint32_t crc_32_tab[] = { /* CRC polynomial 0xedb88320 */
     0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D,
 };
 
-// I don't really understand how the hash calculation code, it's pretty deep in
-// the math. But it's unit tested, so it's fine.
+// I don't really understand the hash calculation code, it's a lot of math.
+// But it's short and unit tested, so it's not a problem.
 #define UPDC32(octet, crc) (crc_32_tab[((crc) ^ (octet)) & 0xFF] ^ ((crc) >> 8));
 
-u32 crc32buf(const char* buf, u32 len) {
+u32 crc32buf(const u8* buf, u32 len) {
     u32 oldcrc32 = 0xFFFFFFFF;
 
     while (len) {
