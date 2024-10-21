@@ -11,18 +11,18 @@ typedef struct {
     sha1_digest digest;
 }sha1_testcase;
 
-const char data1[] = "The answer to life, the universe, and everything";
-const char data2[] = "The quick brown fox jumps over the lazy dog";
+const char sha1_data1[] = "The answer to life, the universe, and everything";
+const char sha1_data2[] = "The quick brown fox jumps over the lazy dog";
 
-sha1_testcase test_cases[] = {
+sha1_testcase sha1_test_cases[] = {
     {
-        data1,
-        sizeof(data1) - 1, // Subtract 1 to exclude null terminator
+        sha1_data1,
+        sizeof(sha1_data1) - 1, // Subtract 1 to exclude null terminator
         {0x6F, 0xC7, 0xB0, 0xE0, 0x0B, 0x5A, 0x30, 0x2D, 0x11, 0x22, 0xB1, 0xC0, 0x25, 0x8E, 0xF4, 0xBB, 0x7B, 0x2F, 0x2A, 0x6F},
     },
     {
-        data2,
-        sizeof(data2) - 1, // Subtract 1 to exclude null terminator
+        sha1_data2,
+        sizeof(sha1_data2) - 1, // Subtract 1 to exclude null terminator
         {0x2F, 0xD4, 0xE1, 0xC6, 0x7A, 0x2D, 0x28, 0xFC, 0xED, 0x84, 0x9E, 0xE1, 0xBB, 0x76, 0xE7, 0x39, 0x1B, 0x93, 0xEB, 0x12},
     },
 };
@@ -30,8 +30,8 @@ sha1_testcase test_cases[] = {
 bool test_sha1() {
     bool result = true;
 
-    for (u32 i = 0; i < ARRAY_SIZE(test_cases); i++) {
-        sha1_testcase test = test_cases[i];
+    for (u32 i = 0; i < ARRAY_SIZE(sha1_test_cases); i++) {
+        sha1_testcase test = sha1_test_cases[i];
         sha1_digest digest = SHA1_buf((u8*)test.data, test.data_size);
         const bool result_memcmp = memcmp(&test.digest, &digest, sizeof(test.digest)) == 0;
         const bool result_sha1cmp = SHA1_equal(test.digest, digest);

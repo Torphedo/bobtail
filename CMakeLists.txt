@@ -26,6 +26,7 @@ add_library(bobtail STATIC
     common/arguments.c
     common/logging.c
     common/sha1.c
+    common/crc32.c
     common/image.c
     common/path.c
     common/list.c
@@ -54,6 +55,7 @@ if (BOBTAIL_TESTS)
         test/test_list.c
         test/test_queue.c
         test/test_sha1.c
+        test/test_crc32.c
         test/test_vmem.c
     )
     target_include_directories(bobtail_test PUBLIC ${bobtail_SOURCE_DIR})
