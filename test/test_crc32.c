@@ -31,7 +31,7 @@ bool test_crc32() {
 
     for (u32 i = 0; i < ARRAY_SIZE(crc_test_cases); i++) {
         crc32_testcase test = crc_test_cases[i];
-        const u32 hash = crc32buf(test.data, test.data_size);
+        const u32 hash = crc32buf((u8*)test.data, test.data_size);
 
         if (hash != test.hash) {
             printf("crc32buf: Hash calculation is wrong! [%u vs. %u]\n", hash, test.hash);

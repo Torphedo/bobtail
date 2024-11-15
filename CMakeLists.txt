@@ -51,12 +51,12 @@ target_include_directories(bobtail PUBLIC ${bobtail_SOURCE_DIR})
 if (BOBTAIL_TESTS)
     add_executable(bobtail_test
         ${test_sources}
-        test/main.c
-        test/test_list.c
-        test/test_queue.c
-        test/test_sha1.c
         test/test_crc32.c
+        test/test_queue.c
+        test/test_list.c
         test/test_vmem.c
+        test/test_sha1.c
+        test/main.c
     )
     target_include_directories(bobtail_test PUBLIC ${bobtail_SOURCE_DIR})
     target_link_libraries(bobtail_test PRIVATE bobtail)

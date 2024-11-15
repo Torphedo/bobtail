@@ -81,6 +81,8 @@ bool test_list() {
         result = false;
     }
 
+    list_destroy(&l);
+
     REPORT_RESULT(result);
     return result;
 }

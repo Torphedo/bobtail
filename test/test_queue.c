@@ -103,6 +103,9 @@ bool test_queue() {
         result = false;
     }
 
+    free(q.data);
+    free(empty.data);
+
     REPORT_RESULT(result);
     return result;
 }
