@@ -29,8 +29,10 @@ bool test_vmem() {
     }
     vmem_destroy_repeat_mapping(ringmap, 8, 5);
 
-    // A 39-bit region is 512 GiB of address space
-    const u64 region_size = exponent(2, 39);
+    // A 35-bit region is 32 GiB of address space. It's easy to reserve much
+    // larger areas (like 512GiB), but those calls will start failing under
+    // valgrind somewhere between 2^35 and 2^36.
+    const u64 region_size = exponent(2, 35);
     u8* region = vmem_reserve(region_size);
     if (region == NULL) {
         printf("Failed to reserve %luGiB region!\n", region_size / exponent(1024, 3));
@@ -45,21 +47,23 @@ bool test_vmem() {
     }
 
     // Write to the region to show it's usable. These are all perfectly valid,
-    // and only ~6MiB of memory is used in total (on my system).
+    // and only a small amount of memory is used (~7MiB in a 512GiB region).
     // (I think the OS allocates a bunch of pages at once, under the assumption
     // you'll use it sequentially. So there is overhead, but not a ton)
-    *region = 20;
-    region[100000] = 20;
-    region[1000000] = 20;
-    region[10000000] = 20;
-    region[20000000] = 20;
+    if (region != NULL) {
+        *region = 20;
+        region[100000] = 20;
+        region[1000000] = 20;
+        region[10000000] = 20;
+        region[20000000] = 20;
 
-    // If a segfault happens here, the platform probably requires us to commit
-    // before writing.
-    for (u8 i = 0; i < 39; i++) {
-        region[exponent(2, i)] = 50;
+        // If a segfault happens here, the platform probably requires us to
+        // commit before writing.
+        for (u8 i = 0; i < 35; i++) {
+            region[exponent(2, i)] = 50;
+        }
+        vmem_free(region, region_size);
     }
-    vmem_free(region, region_size);
 
     REPORT_RESULT(result);
     return result;

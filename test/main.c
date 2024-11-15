@@ -3,19 +3,19 @@
 #include <common/int.h>
 #include <common/logging.h>
 
-bool test_list();
-bool test_queue();
-bool test_sha1();
 bool test_crc32();
+bool test_queue();
+bool test_list();
 bool test_vmem();
+bool test_sha1();
 
 typedef bool (*testproc)(void);
 testproc tests[] = {
-    test_list,
-    test_queue,
-    test_sha1,
     test_crc32,
+    test_queue,
+    test_list,
     test_vmem,
+    test_sha1,
 };
 
 int main() {
