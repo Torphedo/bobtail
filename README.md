@@ -2,12 +2,13 @@
 This project is essentially my own mini standard library for C11. I ended up
 needing a lot of the same helper functions in most of my projects, so I finally
 stopped copy-pasting the files between projects and made it a separate repo.
-Not everything is unit-tested, but some of the more brittle parts are.
+Not everything is unit-tested, but some of the more brittle parts are. 90% of
+the codebase is portable to C99, I only really use `static_assert` from C11.
 
 There are doxygen docs for the entire library, but if you're just browsing this
 repo, here's a quick overview:
 
-- File Utilities [common/file.h]
+- File Utilities [`common/file.h`]
   - Simple wrappers around `stat` and `stdio.h`, useful for when you want
   something simple done with less boilerplate.
   - Read entire file [into a new or existing buffer]
@@ -15,13 +16,13 @@ repo, here's a quick overview:
   - "is a file/directory" checks
 
 
-- Endian Handling [common/endian.h]
+- Endian Handling [`common/endian.h`]
   - Generic macros to flip the endian of any value (in-place), big vs. little
   endian check function. Endian swaps compile down to a single instruction on
   many compilers, and the endian check is usually optimized out completely.
 
 
-- Cross-Platform Virtual Memory Utilities [common/vmem.h]
+- Cross-Platform Virtual Memory Utilities [`common/vmem.h`]
   - Virtual memory helper API for Windows, Linux/Unix/MacOS, and Nintendo Switch.
     A different implementation is compiled depending on the platform, but the
     API's behaviour is almost identical on all platforms.
@@ -35,12 +36,12 @@ repo, here's a quick overview:
     Nintendo Switch.
 
 
-- "Virtual File" [common/vfile.h]
+- "Virtual Files" [`common/vfile.h`]
   - `stdio`-style API that acts on buffers of memory instead of files.
   - Has none of the alignment/size restrictions of anonymous memory-mapped files
 
 
-- Image/Texture Processing [common/image.h]
+- Image/Texture Processing [`common/image.h`]
   - Fairly simple API to handle image formats commonly used in DDS files. It's
     essentially a simpler DDS structure that can express *most* image formats
     expressable in DDS.
@@ -48,12 +49,12 @@ repo, here's a quick overview:
     formats like PNG or JPEG.
 
 
-- Dynamic List/Queue [common/list.h & common/queue.h]
+- Dynamic List/Queue [`common/list.h` & `common/queue.h`]
   - Exactly what they sound like. Pointers to individual elements may be
   invalidated, and removing items is constant-time.
 
 
-- Reasonable Platform Macros [common/platform.h]
+- Reasonable Platform Macros [`common/platform.h`]
   - I got tired of dealing with all the inconsistent, underscore-filled platform
   macros everywhere. These are really just re-skins, but named reasonable things
   you can remember:
@@ -65,11 +66,11 @@ repo, here's a quick overview:
     - `PLATFORM_SWITCH`
 
 
-- UTF-8 [common/utf8.h]
+- UTF-8 [`common/utf8.h`]
   - Unicode codepoint <-> UTF-8 translation
 
 
-- OpenGL Helpers [common/shader.h & common/gl_debug.h & common/model.h]
+- OpenGL Helpers [`common/shader.h` & `common/gl_debug.h` & `common/model.h`]
   - These all assume GLAD as their OpenGL header
   - Shader Compilation
     - Compile normal (vertex & fragment) shaders, check for errors, and print
@@ -84,10 +85,12 @@ repo, here's a quick overview:
     starting point if you know at least a little about vertex layout in OpenGL
 
 
-- Hashing [common/crc32.h & common/sha1.h]
+- Hashing [`common/crc32.h` & `common/sha1.h`]
   - These are just public domain hash function implementations I re-use often.
+    - CRC32 by Gary S. Brown, 1986
+    - SHA-1 (slightly) adapted from RFC 3171
 
 
-- Misc. Utilities [common/int.h]
+- Misc. Utilities [`common/int.h`]
    - Shorthands for `stdint.h` types, and random functions like `MAX`,
    `ARRAY_SIZE`, and bitmask helpers.
