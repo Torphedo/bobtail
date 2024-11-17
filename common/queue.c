@@ -100,3 +100,11 @@ void queue_clear(queue* q) {
     q->back_idx = 0;
 }
 
+void queue_destroy(queue* q) {
+    // Wipe all data
+    memset(q->data, 0, q->alloc_size);
+
+    void* data = q->data;
+    *q = (queue){0}; // Wipe structure
+    free(data); // Free backing buffer
+}

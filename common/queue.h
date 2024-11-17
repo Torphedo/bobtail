@@ -20,7 +20,7 @@
 // TODO: Make this structure generic like the dynamic list.
 
 /// The underlying data type used for the dynamic queue
-typedef u64 queue_element;
+typedef s64 queue_element;
 
 /// @brief An automatically expanding dynamic queue
 ///
@@ -45,6 +45,13 @@ typedef struct {
 /// @param init_size Initial allocation size in bytes
 /// @note This allocates memory!
 queue queue_create(u32 init_size);
+
+/// @brief Destroy / free a queue
+///
+/// @param q The queue to destroy
+/// This will replace the backing buffer pointer with NULL, and fill the entire
+/// contents of the buffer with zeroes.
+void queue_destroy(queue* q);
 
 /// @brief Add an element to the back of the queue.
 /// @note If the backing buffer is full, this can allocate memory.

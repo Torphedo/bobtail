@@ -103,8 +103,8 @@ bool test_queue() {
         result = false;
     }
 
-    free(q.data);
-    free(empty.data);
+    queue_destroy(&q);
+    queue_destroy(&empty);
 
     REPORT_RESULT(result);
     return result;
