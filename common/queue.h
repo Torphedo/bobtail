@@ -20,7 +20,7 @@
 // TODO: Make this structure generic like the dynamic list.
 
 /// The underlying data type used for the dynamic queue
-typedef s64 queue_element;
+typedef u32 queue_element;
 
 /// @brief An automatically expanding dynamic queue
 ///
