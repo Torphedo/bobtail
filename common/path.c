@@ -2,12 +2,14 @@
 #include <stdbool.h>
 #include <string.h>
 
+// Important: platform.h has to come before int.h, to avoid a compiler warning
+// for redefining MIN()/MAX() macros on some platforms.
+#include "platform.h"
 #include "int.h"
 #include "file.h"
 #include "logging.h"
 
 
-#include "platform.h"
 #if defined(PLATFORM_APPLE)
     #include <mach-o/dyld.h>
 #endif
