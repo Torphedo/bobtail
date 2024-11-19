@@ -57,7 +57,11 @@ void queue_destroy(queue* q);
 /// @note If the backing buffer is full, this can allocate memory.
 void queue_add(queue* q, queue_element val);
 
-/// Remove the element at the front of the queue, and return it.
+
+/// Return the element at the front of the queue.
+queue_element queue_peek(queue q);
+
+/// Same as @ref queue_peek, but removes the front element.
 queue_element queue_get(queue* q);
 
 /// Reset internal state and fill backing buffer with 0. Does not free buffer.

@@ -78,13 +78,23 @@ void queue_add(queue* q, queue_element val) {
     q->data[q->back_idx++] = val;
 }
 
-queue_element queue_get(queue* q) {
+queue_element queue_peek(queue q) {
     // We can't get a value if there's not enough buffer space for the read
-    if (q->alloc_size < sizeof(queue_element) || q->data == NULL) {
+    if (q.alloc_size < sizeof(queue_element) || q.data == NULL) {
         return 0;
     }
 
-    const queue_element val = q->data[q->front_idx++];
+    return q.data[q.front_idx];
+}
+
+queue_element queue_get(queue* q) {
+    // Get top and increment idx
+    const queue_element val = queue_peek(*q);
+    if (val == 0) {
+        // TODO: Does returning 0 make sense here? 0 is a perfectly valid value
+        return 0;
+    }
+    q->front_idx++;
 
     // If this was the last item, reset so the entire buffer can be re-used.
     if (q->front_idx == q->back_idx) {
