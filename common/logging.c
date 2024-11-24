@@ -1,11 +1,10 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include <stdatomic.h>
 
 #include "logging.h"
 
-atomic_bool logging_enabled = true;
+bool logging_enabled = true;
 
 #ifdef _WIN32
 #include <windows.h>

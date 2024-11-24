@@ -3,7 +3,7 @@
 /// @file logging.h
 /// A logging wrapper allowing color coding, automatic insertion of the current
 /// function name, and the ability to silence all output.
-#include <stdatomic.h>
+#include <stdbool.h>
 
 /// Color-codes the function name red
 static const char error[] = "31";
@@ -43,6 +43,6 @@ int logging_print(const char* type, const char* function, const char* format_str
 unsigned short enable_win_ansi();
 
 /// Global variable used to toggle all logging
-extern atomic_bool logging_enabled;
+extern bool logging_enabled;
 
 #endif // LOGGING_H
