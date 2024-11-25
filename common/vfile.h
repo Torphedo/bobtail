@@ -25,9 +25,19 @@ vfile vfile_open(void* ptr, u32 size);
 /// Whether this file has reached the end of the allowed memory region
 bool vfile_eof(vfile file);
 
-/// Check if a vfile has space for a write of some arbitrary size. Automatically 
-/// prints an error message on failure.
-bool vfile_writecheck(vfile* file, u32 writesize);
+/// Check if a vfile has space for a read/write of some arbitrary size.
+/// Automatically prints an error message on failure.
+bool vfile_opcheck(vfile* file, u32 writesize);
+
+/// Advance the file pointer by an amount
+/// @param file The file to modify
+/// @param size The number of bytes to advance
+void vfile_seek(vfile* file, u32 size);
+
+/// @brief Get the current position as a pointer
+///
+/// This is basically just to hide pointer casts.
+void* vfile_cur(vfile file);
 
 /// @brief Read data from a virtual file.
 ///
@@ -62,7 +72,7 @@ bool vfile_writecheck(vfile* file, u32 writesize);
 // TODO: If we ever get C23, use typeof() so it can just be VFILE_WRITE(file, val)
 #define VFILE_WRITE(T, file, val)                         \
     do {                                                  \
-        if (vfile_writecheck(file, sizeof(T))) {          \
+        if (vfile_opcheck(file, sizeof(T))) {             \
             *((T)*)(&(file)->ptr[(file)->pos]) = (val);   \
             const u32 _newpos = (file)->pos + sizeof(T);  \
             (file)->pos = MIN(_newpos, (file)->size - 1); \
