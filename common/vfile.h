@@ -43,7 +43,7 @@ bool vfile_writecheck(vfile* file, u32 writesize);
 /// @return The requested data is returned as if this was a function of return
 /// type @p T.
 // TODO: Use MIN() here to avoid reading out of bounds
-#define VFILE_READ(T, file) (*((T)*)(&(file)->ptr[((file)->pos += sizeof(T)) - sizeof(T)]))
+#define VFILE_READ(T, file) (*(T*)(&(file)->ptr[((file)->pos += sizeof(T)) - sizeof(T)]))
 
 /// @brief Write data to a virtual file.
 ///
