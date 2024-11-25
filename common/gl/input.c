@@ -174,7 +174,7 @@ void set_input_by_glfw_code(int key, bool state, int mods) {
             input.insert = state;
             break;
     	case GLFW_KEY_DELETE:
-            input.delete = state;
+            input.del = state;
             break;
     	case GLFW_KEY_RIGHT:
             input.right = state;
