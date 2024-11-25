@@ -101,7 +101,7 @@ typedef struct {
     bool tab: 1;
     bool backspace: 1;
     bool insert: 1;
-    bool delete: 1;
+    bool del: 1; // Can't be named "delete" for C++ compatibility
     bool right: 1;
     bool left: 1;
     bool down: 1;
