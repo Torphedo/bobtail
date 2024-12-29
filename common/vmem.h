@@ -1,5 +1,8 @@
 #ifndef VMEM_H
 #define VMEM_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 /// @file vmem.h
 /// @brief Cross-platform virtual memory utilities
 /// @author Greenlord/S41L0R (Nintendo Switch implementation)
@@ -46,7 +49,6 @@ void* vmem_create_repeat_mapping(u32 ring_width, u32 repeat_count);
 void vmem_destroy_repeat_mapping(void* base_addr, u32 ring_width, u32 repeat_count);
 
 
-
 /// @brief Reserve a virtual memory region without committing any physical RAM.
 ///
 /// Only address space is reserved, and no space is reserved in the page file.
@@ -74,4 +76,7 @@ int vmem_commit(void* addr, u64 size);
 /// @return 0 on success, -1 on failure.
 int vmem_free(void* addr, u64 size);
 
+#ifdef __cplusplus
+}
+#endif
 #endif // VMEM_H

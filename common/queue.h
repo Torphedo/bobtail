@@ -1,5 +1,8 @@
 #ifndef QUEUE_H
 #define QUEUE_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 /// @file queue.h
 /// @brief An auto-expanding dynamic queue implementation
 ///
@@ -39,7 +42,7 @@ typedef struct {
     u32 front_idx;
     /// Index of the back of the queue
     u32 back_idx;
-}queue;
+} queue;
 
 /// @brief Create a queue.
 /// @param init_size Initial allocation size in bytes
@@ -70,4 +73,7 @@ void queue_clear(queue* q);
 /// Check whether the queue is empty
 bool queue_empty(queue q);
 
+#ifdef __cplusplus
+}
+#endif
 #endif // #ifndef QUEUE_H

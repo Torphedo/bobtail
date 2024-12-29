@@ -1,5 +1,8 @@
 #ifndef LIST_H
 #define LIST_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 /// @file list.h
 /// @brief Automatically expanding dynamic list
 /// @warning Don't keep pointers / indices to elements of the list for any
@@ -33,7 +36,7 @@ typedef struct {
     u32 end_idx;
     /// Size of each array element
     u32 element_size;
-}list;
+} list;
 
 /// Create a list.
 /// @param init_size The allocation size in bytes. Please try to align to
@@ -110,4 +113,7 @@ bool list_contains(list l, const void* data);
 /// @brief Whether the list is empty
 bool list_empty(list l);
 
+#ifdef __cplusplus
+}
+#endif
 #endif // #ifndef LIST_H

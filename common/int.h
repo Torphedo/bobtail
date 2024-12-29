@@ -1,5 +1,8 @@
 #ifndef INT_H
 #define INT_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 /// @file int.h
 
 #include <stdint.h>
@@ -67,4 +70,8 @@ void print_c16s(const c16* str);
 
 /// Can only be used on arrays with compile-time known sizes
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(*(arr)))
+
+#ifdef __cplusplus
+}
+#endif
 #endif // INT_H

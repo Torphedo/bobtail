@@ -1,5 +1,11 @@
+# Build output
 out/
 cmake-*
+
+# Workspace files
+.idea/
+.vscode/
+.cache/
 
 # Doxygen stuff
 html/

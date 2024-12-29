@@ -1,5 +1,8 @@
 #ifndef IMAGE_H
 #define IMAGE_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 /// @file image.h
 /// @brief Utilities for handling raw and formatted image data
 
@@ -18,7 +21,7 @@ typedef enum {
     BC4,
     /// Not a real enum value. Increment then modulo by this to cycle through formats
     DXT_ENUM_MAX,
-}img_fmt_compressed;
+} img_fmt_compressed;
 
 enum {
     /// Width/height (in pixels) of a compressed texture block
@@ -47,7 +50,7 @@ typedef struct {
     u8 unit_size;
     /// @brief Number of uncompressed color channels
     u8 channels;
-}texture;
+} texture;
 
 /// Round image dimensions down to some value
 void img_snap(texture* img, u32 size);
@@ -58,5 +61,7 @@ void img_write(texture img, const char* path);
 /// Load a DDS from disk
 texture image_buf_load(const char* filename, u8* img_buf, u32 buf_size);
 
+#ifdef __cplusplus
+}
+#endif
 #endif // #ifndef IMAGE_H
-
