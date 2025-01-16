@@ -1,12 +1,16 @@
 #ifndef UTF8_H
 #define UTF8_H
+#ifdef __cplusplus
+extern "C" {
+#endif
+/// @file utf8.h
+/// @brief Functions for handling Unicode codepoints and UTF-8
+// This file might get renamed to "unicode.h" later, if I add UTF-16/UCS-2
+// support
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include "int.h"
-/// @file utf8.h
-/// @brief Functions for handling Unicode codepoints and UTF-8
-// This file might get renamed to "unicode.h" later if I add UTF-16/UCS-2
-// support
 
 enum {
     /// Special codepoint that should be displayed in case of error
@@ -26,17 +30,14 @@ static s8 utf8_byte_len(u8 byte) {
     if (byte >> 7 == 0) {
         return 1;
     }
-    // Every additional leading 1 means the character is one byte longer
+        // Every additional leading 1 means the character is one byte longer
     else if (byte >> 5 == 0b110) {
         return 2;
-    }
-    else if (byte >> 4 == 0b1110) {
+    } else if (byte >> 4 == 0b1110) {
         return 3;
-    }
-    else if (byte >> 3 == 0b11110) {
+    } else if (byte >> 3 == 0b11110) {
         return 4;
-    }
-    else if (byte >> 6 == 0b10) {
+    } else if (byte >> 6 == 0b10) {
         // Continuation byte (middle of a multi-byte character).
         return 0;
     }
@@ -74,7 +75,7 @@ static u8 utf8_starting_shift(u8 len) {
 /// could be the whole 4 bytes. You should use strncpy() into a UTF-8 buffer.
 typedef struct {
     char data[4];
-}utf8;
+} utf8;
 
 /// Encodes a Unicode codepoint as UTF-8
 static utf8 codepoint_to_utf8(u32 codepoint) {
@@ -139,8 +140,7 @@ static u32 utf8_codepoint(const char* bytes, u8* length_out) {
             *length_out = 1;
         }
         return UNICODE_MISSING_CHARACTER;
-    }
-    else if (len == 1) {
+    } else if (len == 1) {
         // Single-byte ASCII character, the byte's value is the codepoint
         return bytes[0];
     }
@@ -155,7 +155,7 @@ static u32 utf8_codepoint(const char* bytes, u8* length_out) {
             data = bytes[i] & (0xFF >> (len + 1));
             data_bits = (8 - (len + 1));
         }
-        // Don't need to handle 1-byte characters here, they have an early exit
+            // Don't need to handle 1-byte characters here, they have an early exit
         else {
             // Continuation byte
             data = bytes[i] & 0b00111111;
@@ -172,4 +172,7 @@ static u32 utf8_codepoint(const char* bytes, u8* length_out) {
     return codepoint;
 }
 
+#ifdef __cplusplus
+}
+#endif
 #endif // UTF8_H

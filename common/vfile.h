@@ -1,5 +1,8 @@
 #ifndef VFILE_H
 #define VFILE_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 /// @file vfile.h
 /// @brief A stdio-style interface that can treat memory like a file stream
 
@@ -36,7 +39,7 @@ void vfile_seek(vfile* file, u32 size);
 
 /// @brief Get the current position as a pointer
 ///
-/// This is basically just to hide pointer casts.
+/// This basically just hides some pointer casts.
 void* vfile_cur(vfile file);
 
 /// @brief Read data from a virtual file.
@@ -81,4 +84,7 @@ void* vfile_cur(vfile file);
 // The MIN() keeps us from advancing past EOF
 // The do-while loop forces you to use a semicolon when calling the macro
 
+#ifdef __cplusplus
+}
+#endif
 #endif // #ifndef VFILE_H

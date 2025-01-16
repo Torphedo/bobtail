@@ -1,5 +1,8 @@
 #ifndef SHA1_H
 #define SHA1_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 /// @file sha1.h
 /// @brief SHA-1 hashing implementation
 ///
@@ -17,7 +20,7 @@ enum {
 /// A simple struct allowing SHA-1 digests to be passed between functions
 typedef struct {
     u8 bytes[SHA1_HASH_SIZE];
-}sha1_digest;
+} sha1_digest;
 
 /// Calculate SHA-1 digest of any buffer
 sha1_digest SHA1_buf(u8* buf, u64 len);
@@ -30,4 +33,8 @@ bool SHA1_blank(sha1_digest x);
 
 /// Print a SHA-1 digest in uppercase hexidecimal format (no newline)
 void SHA1_print(sha1_digest x);
+
+#ifdef __cplusplus
+}
+#endif
 #endif // SHA1_H

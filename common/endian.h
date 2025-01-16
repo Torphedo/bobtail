@@ -1,9 +1,8 @@
 #ifndef ENDIAN_H
 #define ENDIAN_H
-#include <stdbool.h>
-#include <memory.h>
-#include "int.h"
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 /// @file endian.h
 /// @brief Utilities for handling endianness
 ///
@@ -19,6 +18,10 @@
 /// so they used big endian. Since the Xbox 360 was big endian and most modern
 /// PCs are little endian, we need to reverse the byte order of every number
 /// stored using more than 1 byte before we use it.
+
+#include <stdbool.h>
+#include <memory.h>
+#include "int.h"
 
 /// @brief "Runtime" check for the current endianness.
 ///
@@ -59,4 +62,7 @@ do {                                  \
     memcpy(&(val), ((u8*)&v) + 1, 3); \
 } while(0)
 
+#ifdef __cplusplus
+}
+#endif
 #endif // ENDIAN_H

@@ -1,5 +1,8 @@
 #ifndef PATH_H
 #define PATH_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 /// @file path.h
 /// @brief Utilities for working with filepaths
 
@@ -36,7 +39,7 @@ bool path_has_slashes(const char* path);
 
 /// @brief Isolate just the filename component of a path
 ///
-/// To be safe, @p output should be the same size as @p path.
+/// @p output should be at least as big as @p path.
 /// @param path The path to get the filename from
 /// @param output Where to write the filename component
 void path_get_filename(const char* path, char* output);
@@ -44,9 +47,12 @@ void path_get_filename(const char* path, char* output);
 /// @brief Find the parent directory of this executable.
 ///
 /// @param argv_0 your argv[0] from main(). This is only really needed on
-/// OpenBSD, but you should provide it for consistency.
+/// OpenBSD, but you should always provide it for consistency.
 /// @note This allocates memory! Caller is responsible for freeing the output
 /// string.
 char* get_self_path(const char* argv_0);
 
+#ifdef __cplusplus
+}
+#endif
 #endif // #ifndef PATH_H
