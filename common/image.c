@@ -131,6 +131,7 @@ void img_write(texture img, const char* path) {
     dds_header header = mk_header(img.height, img.width, img.mip_level);
     if (img.compressed) {
         header.flags |= DDSD_LINEARSIZE;
+        header.flags ^= DDSD_PITCH;
         u8 block_size = DXT1_BLOCK_SIZE;
 
         // Handle each format
@@ -160,13 +161,14 @@ void img_write(texture img, const char* path) {
     }
     else {
         header.flags |= DDSD_PITCH;
-        u32 bytes_per_channel = 8 << img.unit_size;
-        header.pitch_or_linear_size = bytes_per_channel * (img.channels) * img.width;
-        header.pixel_format.bits_per_pixel = bytes_per_channel * img.channels;
+        u32 bits_per_channel = 8 << img.unit_size;
+        header.pixel_format.bits_per_pixel = bits_per_channel * img.channels;
+        // Kind of magic pitch formula, I think it comes from MSDN.
+        header.pitch_or_linear_size = (img.width * header.pixel_format.bits_per_pixel + 7) / 8;
         tex_size = header.pitch_or_linear_size * img.height;
 
         header.pixel_format.flags |= DDPF_RGB;
-        if (img.channels > 4) {
+        if (img.channels == 4) {
             header.pixel_format.flags |= DDPF_ALPHAPIXELS;
         }
         // if (img.channels == 2) {
@@ -182,14 +184,15 @@ void img_write(texture img, const char* path) {
         }
         else {
             switch (img.channels) {
+                // Fallthrough is intentional here
                 case 4:
                     header.pixel_format.alpha_bitmask = 0xFF << 24;
                 case 3:
-                    header.pixel_format.blue_bitmask = 0xFF << 16;
+                    header.pixel_format.blue_bitmask = 0xFF;
                 case 2:
                     header.pixel_format.green_bitmask = 0xFF << 8;
                 case 1:
-                    header.pixel_format.red_bitmask = 0xFF;
+                    header.pixel_format.red_bitmask = 0xFF << 16;
             }
         }
     }
