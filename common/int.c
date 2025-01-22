@@ -1,6 +1,7 @@
 #include <memory.h>
 #include <stdio.h>
 #include <stddef.h>
+#include <assert.h>
 
 #include "int.h"
 
@@ -47,6 +48,13 @@ u64 exponent(u32 val, u8 pow) {
         out *= val;
     }
     return out;
+}
+
+float reflect(float val, float axis) {
+    const float distance = axis - val;
+
+    // Go towards the axis but "overshoot" by 2x, reflecting the value.
+    return val + (distance * 2.0f);
 }
 
 void print_c16s(const c16* str) {
