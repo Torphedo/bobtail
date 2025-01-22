@@ -4,11 +4,88 @@
 
 #ifdef PLATFORM_POSIX
 #include <stdlib.h> // For NULL
-#include "int.h"
-#include "vmem.h"
+#include <stdio.h>
+#include <stdbool.h>
+
 #include <sys/mman.h>
 #include <fcntl.h>
-#include <stdio.h>
+
+#include "int.h"
+#include "vmem.h"
+
+// Write-tracking isn't part of POSIX, we have to rely on more OS-specific APIs
+#ifdef PLATFORM_LINUX
+
+enum {
+    // https://www.kernel.org/doc/Documentation/vm/soft-dirty.txt
+    PAGE_FLAG_SOFT_DIRTY = 55,
+};
+
+#define GET_BIT(x, y) (x & ((uint64_t)1 << y)) >> y
+
+bool vmem_reset_write_watching() {
+    FILE* f = fopen("/proc/self/clear_refs", "wb");
+    if (f == NULL) {
+        return false;
+    }
+
+    // Writing this special value to this special file clears the soft-dirty
+    // bit for all pages in this process
+    const uint8_t val = '4';
+    if (fwrite(&val, sizeof(val), 1, f) != 1) {
+        return false;
+    }
+
+    fclose(f);
+    return true;
+}
+
+void* vmem_alloc_watched(u64 num_pages) {
+    // Since we can get dirty state of any page on Linux and reserved memory is
+    // immediately usable, there's nothing special to do here. This function
+    // exists just for consistency in user code.
+    return vmem_reserve(num_pages * VMEM_PAGE_SIZE);
+}
+
+bool vmem_get_dirty_pages(void* addr, u64 num_pages, void** dirty_out, u64 dirty_out_size, u64* num_dirty_out) {
+    FILE* f = fopen("/proc/self/pagemap", "rb");
+    const u64 page_num = ((uintptr_t)addr / getpagesize());
+    if (fseek(f, page_num * sizeof(u64), SEEK_SET)) {
+        // Some seek failure??
+        return false;
+    }
+    *num_dirty_out = 0;
+
+    // No bounds checking is needed inside the loop because our loop boundary
+    // accounts for user array size.
+    for (u64 i = 0; i < MIN(num_pages, dirty_out_size); i++) {
+        // We assume the page is dirty until told otherwise, better safe than sorry.
+        bool is_dirty = true;
+
+        // Read page flags
+        uint64_t flags = 0;
+        if (fread(&flags, sizeof(flags), 1, f) == 1) {
+            // We were able to read successfully!
+            is_dirty = GET_BIT(flags, PAGE_FLAG_SOFT_DIRTY);
+        }
+
+        if (is_dirty) {
+            // Save the address to the output array
+            void* dirty_addr = (u8*)addr + (i * VMEM_PAGE_SIZE);
+            dirty_out[i] = dirty_addr;
+            // I'm just not going to bother remembering the correct order of
+            // parentheses needed to do this with a "++".
+            *num_dirty_out = *num_dirty_out + 1;
+        }
+    }
+
+    fclose(f);
+    return true;
+}
+
+#endif
+
+// After this point are only standard POSIX implementations.
 
 void* vmem_create_repeat_mapping(u32 ring_width, u32 repeat_count) {
     // To trick mmap() into mapping the same region to consecutive virtual
@@ -80,4 +157,3 @@ int vmem_free(void* addr, u64 size) {
     return munmap(addr, size);
 }
 #endif
-
