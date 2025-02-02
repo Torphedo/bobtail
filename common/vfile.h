@@ -9,6 +9,7 @@ extern "C" {
 #include <stdbool.h>
 
 #include "int.h"
+#include "logging.h"
 
 /// Virtual file context/state (like stdio FILE*)
 typedef struct {
@@ -79,6 +80,8 @@ void* vfile_cur(vfile file);
             *((T)*)(&(file)->ptr[(file)->pos]) = (val);   \
             const u32 _newpos = (file)->pos + sizeof(T);  \
             (file)->pos = MIN(_newpos, (file)->size - 1); \
+        } else {                                          \
+            LOG_MSG(warning, "write @ 0x%x / 0x%x would be out of bounds [%d bytes]\n", file->pos, file->size, writesize); \
         }                                                 \
     } while (0)
 // The MIN() keeps us from advancing past EOF
