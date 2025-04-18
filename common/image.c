@@ -188,12 +188,21 @@ void img_write(texture img, const char* path) {
                 case 4:
                     header.pixel_format.alpha_bitmask = 0xFF << 24;
                 case 3:
-                    header.pixel_format.blue_bitmask = 0xFF;
+                    header.pixel_format.blue_bitmask = 0xFF << 16;
                 case 2:
                     header.pixel_format.green_bitmask = 0xFF << 8;
                 case 1:
-                    header.pixel_format.red_bitmask = 0xFF << 16;
+                    header.pixel_format.red_bitmask = 0xFF;
             }
+
+            // For some reason red and blue channel bitmasks have to be swapped
+            // (only for RGBA)
+            if (img.channels == 4) {
+                const u32 temp = header.pixel_format.blue_bitmask;
+                header.pixel_format.blue_bitmask = header.pixel_format.red_bitmask;
+                header.pixel_format.red_bitmask = temp;
+            }
+
         }
     }
 
