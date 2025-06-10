@@ -69,13 +69,10 @@ static u8 utf8_starting_shift(u8 len) {
     return first_byte_size + continuation_size;
 }
 
-/// @brief UTF-8 encoding of a single codepoint.
-///
-/// Usually null-terminated, but you shouldn't rely on it since the character
-/// could be the whole 4 bytes. You should use strncpy() into a UTF-8 buffer.
+/// @brief Null-terminated UTF-8 encoding of a single codepoint.
 typedef struct {
-    char data[4];
-} utf8;
+    char data[5];
+}utf8;
 
 /// Encodes a Unicode codepoint as UTF-8
 static utf8 codepoint_to_utf8(u32 codepoint) {
