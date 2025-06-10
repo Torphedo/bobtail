@@ -19,19 +19,30 @@
     #include <windows.h>
 #endif
 
-bool path_has_extension(const char* path, const char* extension) {
-    const u32 pos = strlen(path);
-    const u16 ext_length = strlen(extension);
+bool path_has_extension(const char* path, const char* expected_ext) {
+    const u32 path_len = strlen(path);
+    const u16 expected_len = strlen(expected_ext);
 
-    // File extension is longer than input string.
-    if (ext_length > pos) {
+    // A match is impossible if the extension is longer than the string
+    if (expected_len > path_len) {
         return false;
     }
-    return (strncmp(&path[pos - ext_length], extension, ext_length) == 0);
+    const char* actual_ext = &path[path_len - expected_len];
+    return strncmp(actual_ext, expected_ext, expected_len) == 0;
+}
+
+const char* path_get_extension(const char* path) {
+    // This is basically strrchrnul() (which doesn't exist in POSIX or GNU)
+    // This returns NULL if the character isn't found
+    const char* extension = strrchr(path, '.');
+
+    // Return null terminator (empty string) if no extension was found
+    return extension ? extension : &path[strlen(path)];
 }
 
 void path_fix_backslashes(char* path) {
-    u16 pos = strlen(path) - 1; // Subtract 1 so that we don't need to check null terminator
+    // We subtract 1 to get last character instead of null terminator
+    u16 pos = strlen(path) - 1;
     while (pos > 0) {
         if (path[pos] == '\\') {
             path[pos] = '/';
@@ -43,7 +54,8 @@ void path_fix_backslashes(char* path) {
 // TODO: We should just have a function that replaces all of 1 character with
 // another. Having 2 functions for this is a little ridiculous.
 void path_fix_forward_slashes(char* path) {
-    u16 pos = strlen(path) - 1; // Subtract 1 so that we don't need to check null terminator
+    // We subtract 1 to get last character instead of null terminator
+    u16 pos = strlen(path) - 1;
     while (pos > 0) {
         if (path[pos] == '/') {
             path[pos] = '\\';
@@ -53,21 +65,13 @@ void path_fix_forward_slashes(char* path) {
 }
 
 bool path_has_slashes(const char* path) {
-    s64 pos = strlen(path) - 1; // Subtract 1 so we don't check null terminator
+    const bool found_forward = strchr(path, '/') != NULL;
+    const bool found_backward = strchr(path, '\\') != NULL;
 
-    // Honestly, I'm pretty sure the main reason for looping backwards here is
-    // that I just copied the loop from another function
-    while (pos >= 0) {
-        if (path[pos] == '\\' || path[pos] == '/') {
-            return true;
-        }
-        pos--;
-    }
-
-    // Didn't find anything
-    return false;
+    return found_forward || found_backward;
 }
 
+// TODO: Remove this pos parameter if no one relies on it
 void path_truncate(char* path, u16 pos) {
     path[--pos] = 0; // Removes last character in case of trailing '\\' or '/'.
 
@@ -75,6 +79,18 @@ void path_truncate(char* path, u16 pos) {
     while(path[pos] != '\\' && path[pos] != '/' && pos >= 0) {
         path[pos--] = 0;
     }
+}
+
+const char* path_truncate_clone(const char* path) {
+    // Clone the string (can't rely on GNU strdup())
+    const u32 len = strlen(path);
+    char* str = malloc(len + 1);
+    // strncpy() isn't helpful here since we rely on strlen() already
+    strcpy(str, path);
+
+    path_truncate(str, len + 1);
+
+    return str;
 }
 
 void path_get_filename(const char* path, char* output) {
