@@ -97,25 +97,23 @@ static utf8 codepoint_to_utf8(u32 codepoint) {
         bits_in_first_byte = 3;
     }
 
-    // Mask that only allows the first [bits_in_first_byte] bits
-    const u8 first_byte_mask = 0xFF >> (8 - bits_in_first_byte);
-    // Indicator for encoding length combined with however many bits we can fit
-    const u8 first_byte = (0b11110 << bits_in_first_byte) | (codepoint & first_byte_mask);
-    out.data[0] = first_byte;
-    codepoint >>= bits_in_first_byte;
-
     // For every bit fewer in the first byte, 1 continuation byte is added.
     // CLAMP() ensures we don't try to do 6 - 7 and trigger SIGABORT by
     // overwriting random data on the stack (ask me how I know!)
     const u8 num_continuation_bytes = 6 - CLAMP(0, bits_in_first_byte, 6);
 
+    // Mask that only allows the first [bits_in_first_byte] bits
+    const u8 lo_pass_mask = 0xFF >> (8 - bits_in_first_byte);
+    const u8 header = 0b11110 << bits_in_first_byte; // Encoding length indicator
+
+    const u8 first_byte = header | ((codepoint >> (6 * num_continuation_bytes)) & lo_pass_mask);
+    out.data[0] = first_byte;
+
     // Write up to 3 continuation bytes with 6 bits of information each
-    for (u8 i = 0; i < num_continuation_bytes; i++) {
+    for (s8 i = num_continuation_bytes - 1; i >= 0; i--) {
         const u8 mask = 0b111111; // Mask to get just the low 6 bits
-        // All continuation bytes have "10" as the top 2 bits.
-        const u8 byte = (0b10 << 6) | (codepoint & mask);
-        codepoint >>= 6; // Move on to the next 6 bits
-        out.data[i + 1] = byte;
+        const u8 byte = ((codepoint >> (6 * i) & mask)) | (0b10 << 6);
+        out.data[num_continuation_bytes - i] = byte;
     }
 
     return out;
