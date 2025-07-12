@@ -1,9 +1,13 @@
 #include "crc32.h"
+#include "endian.h"
+#include <immintrin.h>
 
 /* Copyright (C) 1986 Gary S. Brown.  You may use this program, or
    code or tables extracted from it, as desired without restriction.*/
 
-static const uint32_t crc_32_tab[] = { /* CRC polynomial 0xedb88320 */
+ /* CRC polynomial 0xedb88320 */
+ /* Used in Ethernet, PKZIP, etc. */
+static const uint32_t crc_32_tab[] = {
     0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F,
     0xE963A535, 0x9E6495A3, 0x0EDB8832, 0x79DCB8A4, 0xE0D5E91E, 0x97D2D988,
     0x09B64C2B, 0x7EB17CBD, 0xE7B82D07, 0x90BF1D91, 0x1DB71064, 0x6AB020F2,
@@ -63,4 +67,23 @@ u32 crc32buf(const u8* buf, u32 len) {
     }
 
     return ~oldcrc32;
+}
+
+u32 crc32c(const u8* buf, u32 len) {
+    const u8* endbuf = buf + len;
+    u32 crc = ~(u32)0;
+
+    // Do CRC steps 8 bytes at a time
+    for (u32 i = 0; i < len / 8; i++) {
+        const u64* val = (u64*)buf;
+        crc = __builtin_ia32_crc32di(crc, *val);
+        buf += sizeof(val);
+    }
+
+    do {
+        crc = __builtin_ia32_crc32qi(crc, *buf);
+        buf++;
+    } while (buf < endbuf);
+
+    return ~crc;
 }
