@@ -4,6 +4,9 @@ set(CMAKE_C_STANDARD 11)
 # Emit a compile_commands.json for use with clangd in LSPs
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
+# For CRC32C SSE intrinsics
+add_compile_options(-mcrc32)
+
 option(BOBTAIL_OPENGL "Include OpenGL helpers like shader compilation wrappers. Requires GLFW, GLAD, and CGLM")
 option(BOBTAIL_TESTS "Build library unit tests")
 
