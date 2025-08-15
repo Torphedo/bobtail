@@ -177,7 +177,7 @@ u32 sse_crc32c(const u8* buf, u32 len) {
 
     // Do CRC steps 8 bytes at a time
     for (u32 i = 0; i < len / 8; i++) {
-        crc = __builtin_ia32_crc32di(crc, *(u64*)buf);
+        crc = (u32)simd_crc32c_u64(crc, *(u64*)buf);
         buf += sizeof(u64);
     }
 
@@ -185,7 +185,7 @@ u32 sse_crc32c(const u8* buf, u32 len) {
     // care enough to do so. For a more optimal version:
     // https://github.com/htot/crc32c/blob/master/crc32c/crc32c.cc#L178-L229
     while (buf < endbuf) {
-        crc = __builtin_ia32_crc32qi(crc, *buf);
+        crc = simd_crc32c_u8(crc, *buf);
         buf++;
     }
 
