@@ -10,7 +10,7 @@
 
  /* CRC polynomial 0xedb88320 */
  /* Used in Ethernet, PKZIP, etc. */
-static const uint32_t crc_32_tab[] = {
+static const u32 crc_32_tab[] = {
     0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F,
     0xE963A535, 0x9E6495A3, 0x0EDB8832, 0x79DCB8A4, 0xE0D5E91E, 0x97D2D988,
     0x09B64C2B, 0x7EB17CBD, 0xE7B82D07, 0x90BF1D91, 0x1DB71064, 0x6AB020F2,
@@ -78,7 +78,7 @@ static const uint32_t crc_32_tab[] = {
 /*                                                               */
 /*****************************************************************/
 
-static const uint32_t crc32cTable[256] = {
+static const u32 crc32cTable[256] = {
     0x00000000, 0xF26B8303, 0xE13B70F7, 0x1350F3F4,
     0xC79A971F, 0x35F1141C, 0x26A1E7E8, 0xD4CA64EB,
     0x8AD958CF, 0x78B2DBCC, 0x6BE22838, 0x9989AB3B,
@@ -149,7 +149,7 @@ static const uint32_t crc32cTable[256] = {
 // But it's short and unit tested, so it's not a problem.
 #define UPDC32(octet, crc, table) (table[((crc) ^ (octet)) & 0xFF] ^ ((crc) >> 8));
 
-u32 crc32buf(const u8* buf, u32 len) {
+u32 crc32buf(const u8* buf, u64 len) {
     u32 crc = UINT32_MAX;
     while (len) {
         crc = UPDC32(*buf, crc, crc_32_tab);
@@ -160,7 +160,7 @@ u32 crc32buf(const u8* buf, u32 len) {
     return ~crc;
 }
 
-u32 software_crc32c(const u8* buf, u32 len) {
+u32 software_crc32c(const u8* buf, u64 len) {
     u32 crc = UINT32_MAX;
     while (len) {
         crc = UPDC32(*buf, crc, crc32cTable);
@@ -171,7 +171,7 @@ u32 software_crc32c(const u8* buf, u32 len) {
     return ~crc;
 }
 
-u32 sse_crc32c(const u8* buf, u32 len) {
+u32 sse_crc32c(const u8* buf, u64 len) {
     const u8* endbuf = buf + len;
     u32 crc = UINT32_MAX;
 
@@ -192,7 +192,7 @@ u32 sse_crc32c(const u8* buf, u32 len) {
     return ~crc;
 }
 
-u32 crc32c(const u8* buf, u32 len) {
+u32 crc32c(const u8* buf, u64 len) {
     if (sse4_available()) {
         return sse_crc32c(buf, len);
     } else {
