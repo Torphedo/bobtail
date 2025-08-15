@@ -40,7 +40,7 @@ void path_fix_forward_slashes(char* path);
 /// with null characters.
 /// @param pos The position to start searching for directory separators. This
 /// should usually be the string's length + 1.
-void path_truncate(char* path, u16 pos);
+void path_truncate(char* path, u64 pos);
 
 /// @brief Truncate a filename or folder name from a path, leaving a trailing
 /// "\\" or "/". This variant creates a new string instead of modifying the input.

@@ -20,8 +20,8 @@
 #endif
 
 bool path_has_extension(const char* path, const char* expected_ext) {
-    const u32 path_len = strlen(path);
-    const u16 expected_len = strlen(expected_ext);
+    const u64 path_len = strlen(path);
+    const u64 expected_len = strlen(expected_ext);
 
     // A match is impossible if the extension is longer than the string
     if (expected_len > path_len) {
@@ -40,28 +40,22 @@ const char* path_get_extension(const char* path) {
     return extension ? extension : &path[strlen(path)];
 }
 
-void path_fix_backslashes(char* path) {
-    // We subtract 1 to get last character instead of null terminator
-    u16 pos = strlen(path) - 1;
+void path_replace_char(char* path, char source, char target) {
+    u64 pos = strlen(path) - 1;
     while (pos > 0) {
-        if (path[pos] == '\\') {
-            path[pos] = '/';
+        if (path[pos] == source) {
+            path[pos] = target;
         }
         pos--;
     }
 }
 
-// TODO: We should just have a function that replaces all of 1 character with
-// another. Having 2 functions for this is a little ridiculous.
+void path_fix_backslashes(char* path) {
+    path_replace_char(path, '\\', '/');
+}
+
 void path_fix_forward_slashes(char* path) {
-    // We subtract 1 to get last character instead of null terminator
-    u16 pos = strlen(path) - 1;
-    while (pos > 0) {
-        if (path[pos] == '/') {
-            path[pos] = '\\';
-        }
-        pos--;
-    }
+    path_replace_char(path, '/', '\\');
 }
 
 bool path_has_slashes(const char* path) {
@@ -72,7 +66,7 @@ bool path_has_slashes(const char* path) {
 }
 
 // TODO: Remove this pos parameter if no one relies on it
-void path_truncate(char* path, u16 pos) {
+void path_truncate(char* path, u64 pos) {
     path[--pos] = 0; // Removes last character in case of trailing '\\' or '/'.
 
     // Delete characters until we hit the first slash
@@ -83,7 +77,7 @@ void path_truncate(char* path, u16 pos) {
 
 const char* path_truncate_clone(const char* path) {
     // Clone the string (can't rely on GNU strdup())
-    const u32 len = strlen(path);
+    const u64 len = strlen(path);
     char* str = malloc(len + 1);
     // strncpy() isn't helpful here since we rely on strlen() already
     strcpy(str, path);
@@ -94,7 +88,7 @@ const char* path_truncate_clone(const char* path) {
 }
 
 void path_get_filename(const char* path, char* output) {
-    u16 pos = strlen(path);
+    u64 pos = strlen(path);
     // Loop backwards until we find the first slash
     while(path[pos] != '\\' && path[pos] != '/') {
         pos--;

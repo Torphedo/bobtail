@@ -16,7 +16,7 @@ flags parse_arguments(int argc, char** argv, const char* args[], u32 args_count)
 
     // Loop over every argument, skipping the first which is just our program
     // name.
-    for (u32 i = 1; i < argc; i++) {
+    for (s32 i = 1; i < argc; i++) {
         // Check if first 2 characters are "--"
         if (argv[i][0] != '-' || argv[i][1] != '-') {
             // If it's not a flag, it must be a filename

@@ -88,7 +88,7 @@ int SHA1Result(SHA1Context* context, sha1_digest* digest) {
 }
 
 // Adds an array of bytes as the next portion of the message.
-int SHA1Input(SHA1Context* context, const u8* message_array, u32 length) {
+int SHA1Input(SHA1Context* context, const u8* message_array, u64 length) {
     if (!length) {
         return shaSuccess;
     }

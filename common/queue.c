@@ -5,8 +5,9 @@
 #include "logging.h"
 #include "queue.h"
 
-s32 queue_maxidx(queue q) {
-    return (q.alloc_size / sizeof(*q.data)) - 1;
+u32 queue_maxidx(queue q) {
+    const u32 element_size = (q.alloc_size / sizeof(*q.data));
+    return MAX(0, ((s32)element_size) - 1);
 }
 
 bool queue_fullback(queue q) {

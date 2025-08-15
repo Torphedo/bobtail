@@ -101,7 +101,7 @@ void list_merge(list* dest, list src);
 /// @param l List to search
 /// @param data Data to search for. Must be at least @ref list.element_size.
 /// @return Index of the data, or -1 on failure.
-s64 list_find(list l, const void* data);
+s32 list_find(list l, const void* data);
 
 /// @brief Whether the list contains a certain value.
 /// @param l List to search

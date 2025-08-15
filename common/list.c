@@ -78,8 +78,8 @@ void list_remove(list* l, u32 idx) {
 }
 
 void list_remove_val(list* l, const void* data) {
-    const s64 idx = list_find(*l, data);
-    if (idx == -1) {
+    const s32 idx = list_find(*l, data);
+    if (idx < 0) {
         return;
     }
     list_remove(l, idx);
@@ -92,12 +92,12 @@ void list_merge(list* dest, list src) {
     }
 }
 
-s64 list_find(list l, const void* data) {
+s32 list_find(list l, const void* data) {
     for (u32 i = 0; i < l.end_idx; i++) {
         void* element = list_get_element(l, i);
         if (memcmp(data, element, l.element_size) == 0) {
             // Found it!
-            return i;
+            return (s32)i;
         }
     }
 

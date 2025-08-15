@@ -17,7 +17,7 @@ void* repeat_mapping_fallback(u32 ring_width, u32 repeat_count) {
     const u64 ring_size = ring_width * VMEM_ALLOC_GRANULARITY;
     const u64 mapping_size = ring_size * repeat_count;
     // Create initial file mapping, backed only by the page file
-    HANDLE file_mapping = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, mapping_size << 32, mapping_size & UINT32_MAX, NULL);
+    HANDLE file_mapping = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, mapping_size >> 32, mapping_size & UINT32_MAX, NULL);
     if (file_mapping == INVALID_HANDLE_VALUE) {
         return NULL;
     }

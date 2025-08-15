@@ -9,7 +9,7 @@ bool test_list();
 bool test_vmem();
 bool test_sha1();
 
-typedef bool (*testproc)(void);
+typedef bool (*testproc)();
 testproc tests[] = {
     test_crc32,
     test_queue,
