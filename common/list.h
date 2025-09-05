@@ -13,7 +13,7 @@ extern "C" {
 
 #include <stddef.h>
 #include <stdbool.h>
-#include "int.h"
+#include "buffer.h"
 
 /// @brief An automatically expanding dynamic list
 /// @warning Don't keep pointers / indices to elements of the list for any
@@ -22,13 +22,8 @@ extern "C" {
 /// to the list can and will modify any part of it.
 /// @sa queue
 typedef struct {
-    /// @brief Backing buffer
-    ///
-    /// We use a uintptr_t so we can have a typeless pointer that can't
-    /// accidentally be dereferenced.
-    uintptr_t data;
-    /// Current buffer size
-    u32 alloc_size;
+    buffer_t buf;
+
     /// @brief Index of the next open slot in the array (not the last element!)
     ///
     /// @warning This isn't the index of the last element! It could be an

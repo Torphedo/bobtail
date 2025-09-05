@@ -10,7 +10,7 @@ bool test_list() {
     // Test basic list creation
     const u32 alloc_size = 4;
     list l = list_create(alloc_size, sizeof(u16));
-    if ((void*)l.data == NULL) {
+    if ((void*)l.buf.data == NULL) {
         printf("CREATE: Initial alloc failed!\n");
         return false;
     }
@@ -18,7 +18,7 @@ bool test_list() {
         printf("CREATE: end idx init wrong!\n");
         result = false;
     }
-    if (l.alloc_size != alloc_size) {
+    if (l.buf.alloc_size != alloc_size) {
         printf("CREATE: alloc size init wrong!\n");
         result = false;
     }
@@ -39,7 +39,7 @@ bool test_list() {
         printf("ADD: element not inserted or GET is broken!\n");
         result = false;
     }
-    if(l.alloc_size != 4) {
+    if(l.buf.alloc_size != 4) {
         printf("ADD: unnecessary realloc!\n");
         result = false;
     }
@@ -60,7 +60,7 @@ bool test_list() {
         const u16 loopval = i * 3;
         list_add(&l, &loopval);
     }
-    if (l.alloc_size <= 4) {
+    if (l.buf.alloc_size <= 4) {
         printf("ADD: didn't realloc properly!\n");
         result = false;
     }

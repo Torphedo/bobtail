@@ -34,9 +34,11 @@ add_library(bobtail STATIC
     common/crc32.c
     common/image.c
     common/path.c
+    common/vfile.c
+
+    common/buffer.c
     common/list.c
     common/queue.c
-    common/vfile.c
 
     # Files for other platforms will just be empty and compile instantly
     common/vmem_posix.c
