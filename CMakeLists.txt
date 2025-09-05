@@ -22,9 +22,6 @@ if (BOBTAIL_OPENGL)
         common/gl/shader.c
 
         common/gl/input.c
-        common/gl/vector.c
-        common/gl/model.c
-        common/gl/primitives.c
     )
 endif()
 

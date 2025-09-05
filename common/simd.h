@@ -15,7 +15,7 @@
 #else
 //  GCC Intrinsics
 #include <cpuid.h>
-/// gcc / clang CPUID
+/// GCC / Clang CPUID
 #define cpuid(info, x) __cpuid_count(x, 0, info[0], info[1], info[2], info[3])
 #define simd_crc32c_u8(crc, val) __builtin_ia32_crc32qi(crc, val)
 #define simd_crc32c_u16(crc, val) __builtin_ia32_crc32hi(crc, val)
