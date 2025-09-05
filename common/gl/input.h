@@ -6,7 +6,6 @@
 #include <stdbool.h>
 
 #include <GLFW/glfw3.h>
-#include <cglm/struct.h>
 
 // TLDR: We have to keep state ourselves because relying on the callback creates
 // a delay between pressing a button and it being considered "held", which feels
@@ -18,7 +17,6 @@
 // a key will trigger an action once, then do nothing for a half second until
 // it's considered held. To avoid this we keep track of key state ourselves, so
 // that the key appears held the entire time.
-
 
 /// @brief Gamepad button inputs (no hat switches)
 ///
@@ -178,12 +176,16 @@ typedef struct {
     bool mouse_button_4: 1;
     bool mouse_button_5: 1;
 
-    vec2s cursor;
-    vec2s scroll;
+    float cursor_x;
+    float cursor_y;
+    float scroll_x;
+    float scroll_y;
 
     // Gamepad stuff
-    vec2s LS;
-    vec2s RS;
+    float LS_x;
+    float LS_y;
+    float RS_x;
+    float RS_y;
     float LT;
     float RT;
     gamepad_t gp;

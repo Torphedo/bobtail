@@ -308,13 +308,13 @@ void input_update(GLFWwindow* window, int key, int scancode, int action, int mod
 }
 
 void scroll_update(GLFWwindow* window, double x, double y) {
-    input.scroll.x += x;
-    input.scroll.y += y;
+    input.scroll_x += x;
+    input.scroll_y += y;
 }
 
 void cursor_update(GLFWwindow* window, double x, double y) {
-    input.cursor.x = x;
-    input.cursor.y = y;
+    input.cursor_x = x;
+    input.cursor_y = y;
 }
 
 void mouse_button_update(GLFWwindow* window, int button, int action, int mods) {
@@ -337,8 +337,10 @@ void update_mods(GLFWwindow* window) {
 
 void gamepad_update() {
     // Wipe previous gamepad state
-    input.LS = (vec2s){0};
-    input.RS = (vec2s){0};
+    input.LS_x = 0;
+    input.LS_y = 0;
+    input.RS_x = 0;
+    input.RS_y = 0;
     input.LT = 0;
     input.RT = 0;
     input.gp = (gamepad_t){0};
@@ -353,10 +355,10 @@ void gamepad_update() {
         glfwGetGamepadState(i, &gamepad); // Get input
 
         // Sum up stick inputs from all available controllers
-        input.LS.x += gamepad.axes[GLFW_GAMEPAD_AXIS_LEFT_X];
-        input.LS.y += gamepad.axes[GLFW_GAMEPAD_AXIS_LEFT_Y];
-        input.RS.x += gamepad.axes[GLFW_GAMEPAD_AXIS_RIGHT_X];
-        input.RS.y += gamepad.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y];
+        input.LS_x += gamepad.axes[GLFW_GAMEPAD_AXIS_LEFT_X];
+        input.LS_y += gamepad.axes[GLFW_GAMEPAD_AXIS_LEFT_Y];
+        input.RS_x += gamepad.axes[GLFW_GAMEPAD_AXIS_RIGHT_X];
+        input.RS_y += gamepad.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y];
         input.LT += gamepad.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER];
         input.RT += gamepad.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER];
 
@@ -379,10 +381,10 @@ void gamepad_update() {
 
     // If for some reason someone is moving sticks on multiple controllers at
     // once, keep the results within range.
-    input.LS.x = CLAMP(-1.0f, input.LS.x, 1.0f);
-    input.LS.y = CLAMP(-1.0f, input.LS.y, 1.0f);
-    input.RS.x = CLAMP(-1.0f, input.RS.x, 1.0f);
-    input.RS.y = CLAMP(-1.0f, input.RS.y, 1.0f);
+    input.LS_x = CLAMP(-1.0f, input.LS_x, 1.0f);
+    input.LS_y = CLAMP(-1.0f, input.LS_y, 1.0f);
+    input.RS_x = CLAMP(-1.0f, input.RS_x, 1.0f);
+    input.RS_y = CLAMP(-1.0f, input.RS_y, 1.0f);
     input.LT = CLAMP(-1.0f, input.LT, 1.0f);
     input.RT = CLAMP(-1.0f, input.RT, 1.0f);
 }

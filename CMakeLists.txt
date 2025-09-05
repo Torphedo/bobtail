@@ -12,7 +12,7 @@ else()
     add_compile_options(-mcrc32)
 endif()
 
-option(BOBTAIL_OPENGL "Include OpenGL helpers like shader compilation wrappers. Requires GLFW, GLAD, and CGLM")
+option(BOBTAIL_OPENGL "Include OpenGL helpers like shader compilation wrappers. Requires GLFW and GLAD")
 option(BOBTAIL_TESTS "Build library unit tests")
 
 if (BOBTAIL_OPENGL)
