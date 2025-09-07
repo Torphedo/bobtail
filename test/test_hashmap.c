@@ -10,29 +10,25 @@
 bool test_hashmap() {
     bool result = true;
 
-    hashbuckets_desc buckets = hb_create(4, 4, sizeof(u32));
+    hashbuckets_desc buckets = hb_create(4, 2, sizeof(u32));
     if (!buckets.buckets) {
         result = false;
         goto hb_end;
     }
 
-    const char data_key[] = "a key";
-    const u32 data_key_hash = crc32buf((const u8*)data_key, strlen(data_key));
-
     const u32 data2 = 7;
     const char data2_key[] = "another key";
     const u32 data2_key_hash = crc32buf((const u8*)data2_key, strlen(data2_key));
 
-    HB_ADD_VAL(&buckets, data_key_hash, 42, u32);
-    result &= hb_add_obj(&buckets, data2_key_hash, &data2);
+    HB_ADD_VAL(&buckets, "a key", 42, u32);
+    result &= hb_add_obj(&buckets, "another key", &data2);
     if (!result) {
         printf("Failed to add 2 basic objects to hash buckets.\n");
         goto hb_end;
     }
 
-
-    const u32 fetch = HB_FIND_VAL(&buckets, data_key_hash, u32);
-    const u32* fetch2 = hb_find_obj(&buckets, data2_key_hash);
+    const u32 fetch = HB_FIND_VAL(&buckets, "a key", u32);
+    const u32* fetch2 = hb_find_obj(&buckets, "another key");
     if (!fetch2) {
         printf("Failed to recall 2 values from hash buckets.\n");
         result = false;
@@ -50,6 +46,7 @@ bool test_hashmap() {
         result = false;
         goto hb_end;
     }
+    // hb_resize_buckets(&buckets, 3);
 
 
 hb_end:

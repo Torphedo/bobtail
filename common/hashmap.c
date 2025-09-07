@@ -54,7 +54,7 @@ void* hb_find_slot(const hashbuckets_desc* desc, hashkey_t key) {
     return NULL;
 }
 
-void* hb_find_obj(hashbuckets_desc* desc, hashkey_t hashkey) {
+void* hb_find_obj_direct(hashbuckets_desc* desc, hashkey_t hashkey) {
     void* entry = hb_find_slot(desc, hashkey);
     if (entry) {
         const u32* hash = entry;
@@ -70,12 +70,54 @@ void* hb_find_obj(hashbuckets_desc* desc, hashkey_t hashkey) {
 }
 
 bool hb_resize_buckets(hashbuckets_desc* desc, u32 bucket_entries) {
+    if (desc->bucket_entries == bucket_entries) {
+        return true;
+    }
 
+    hashbuckets_desc new_desc = hb_create(desc->num_buckets, bucket_entries, desc->entry_size);
+    if (!new_desc.buckets) {
+        LOG_MSG(error, "Failed to allocate new buckets when resizing %d -> %d\n", desc->bucket_entries, bucket_entries);
+        return false;
+    }
+
+    const u32 old_bucket_size = desc->bucket_entries * HB_ENTRY_SIZE_BYTES(desc);
+    const u32 new_bucket_size = new_desc.bucket_entries * HB_ENTRY_SIZE_BYTES(desc);
+    const uintptr_t newbuf = (uintptr_t)new_desc.buckets;
+    const uintptr_t oldbuf = (uintptr_t)desc->buckets;
+    const bool shrinking = new_bucket_size < old_bucket_size;
+
+    for (u32 i = 0; i < desc->num_buckets; i++) {
+        const void* old_bucket = (void*)(oldbuf + old_bucket_size * i);
+        void* new_bucket =       (void*)(newbuf + new_bucket_size * i);
+        memcpy(new_bucket, old_bucket, MIN(old_bucket_size, new_bucket_size));
+
+        // This will search for empty slots within this bucket.
+        // We assume that there won't be any small hashes (< num_buckets).
+        const s64 slot = (s64)hb_find_slot(desc, i);
+        if (slot > 0) {
+            const s64 slot_idx = (slot - (s64)old_bucket) / desc->entry_size;
+            const s64 slots_left = (s64)new_desc.bucket_entries - slot_idx - 1;
+            if (slots_left < 0) {
+                LOG_MSG(error, "Cancelling %d -> %d resize because %d entries in bucket %d won't fit\n",
+                        desc->num_buckets, new_desc.bucket_entries, -slots_left, i);
+                hb_destroy(&new_desc);
+                return false;
+            }
+        }
+    }
+
+    hb_destroy(desc);
+    *desc = new_desc;
     return true;
 }
 
-bool hb_add_obj(hashbuckets_desc* desc, hashkey_t hashkey, const void* obj) {
+bool hb_add_obj_direct(hashbuckets_desc* desc, hashkey_t hashkey, const void* obj) {
     void* entry = hb_find_slot(desc, hashkey);
+    if (!entry) {
+        hb_resize_buckets(desc, desc->bucket_entries * 1.5f);
+        entry = hb_find_slot(desc, hashkey);
+    }
+
     if (entry) {
         u32* hash = entry;
         void* obj_slot = (void*)(&hash[1]);
