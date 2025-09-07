@@ -39,6 +39,7 @@ add_library(bobtail STATIC
     common/buffer.c
     common/list.c
     common/queue.c
+    common/hashmap.c
 
     # Files for other platforms will just be empty and compile instantly
     common/vmem_posix.c
@@ -61,6 +62,7 @@ if (BOBTAIL_TESTS)
         test/test_crc32.c
         test/test_queue.c
         test/test_list.c
+        test/test_hashmap.c
         test/test_vmem.c
         test/test_sha1.c
         test/main.c
