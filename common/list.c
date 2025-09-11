@@ -15,7 +15,7 @@ bool list_full(list l) {
 }
 
 void* list_get_element(list l, u32 idx) {
-    return (void*)(l.buf.data + (idx * l.element_size));
+    return (void*)((uintptr_t)l.buf.data + (idx * l.element_size));
 }
 
 list list_create(u32 init_size, u32 element_size) {
