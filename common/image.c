@@ -253,7 +253,10 @@ void img_write(texture img, const char* path) {
             header.pixel_format.flags |= DDPF_RGB;
             break;
         case 2:
-            header.pixel_format.flags = DDPF_ALPHA;
+            // The only way to get a 2-channel image is to use the alpha & red channels
+            header.pixel_format.alpha_bitmask = header.pixel_format.green_bitmask;
+            header.pixel_format.green_bitmask = 0;
+            header.pixel_format.flags = DDPF_ALPHAPIXELS;
             fallthrough;
         case 1:
             header.pixel_format.flags |= DDPF_LUMINANCE;
