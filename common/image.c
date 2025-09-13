@@ -218,22 +218,7 @@ void img_write(texture img, const char* path) {
         header.pitch_or_linear_size = (img.width * header.pixel_format.bits_per_pixel + 7) / 8;
 
         // This assumes no mipmaps
-        tex_size = header.pitch_or_linear_size * img.height;
-
-        switch (img.channels) {
-            case 4:
-                header.pixel_format.flags = DDPF_ALPHAPIXELS;
-                fallthrough;
-            case 3:
-                header.pixel_format.flags |= DDPF_RGB;
-                break;
-            case 2:
-                header.pixel_format.flags = DDPF_LUMINANCE;
-                fallthrough;
-            case 1:
-                header.pixel_format.flags |= DDPF_ALPHA;
-                break;
-        }
+        tex_size = header.pitch_or_linear_size * (u32)img.height;
 
         // 0xFF for 8-bit, 0xFFFF for 16-bit, etc.
         const u32 channel_mask = UINT32_MAX >> (32 - bits_per_channel);
@@ -241,25 +226,38 @@ void img_write(texture img, const char* path) {
         // This is a bit overly generic, but I thought this was easier to follow
         // than multiple branches.
         switch (img.channels) {
-            case 4:
-                header.pixel_format.alpha_bitmask = channel_mask << (3 * bits_per_channel);
-                fallthrough;
-            case 3:
-                header.pixel_format.blue_bitmask = channel_mask << (2 * bits_per_channel);
-                fallthrough;
-            case 2:
-                header.pixel_format.green_bitmask = channel_mask << (1 * bits_per_channel);
-                fallthrough;
-            case 1:
-                header.pixel_format.red_bitmask = channel_mask;
+        case 4:
+            header.pixel_format.alpha_bitmask = channel_mask << (3 * bits_per_channel);
+            fallthrough;
+        case 3:
+            header.pixel_format.blue_bitmask = channel_mask << (2 * bits_per_channel);
+            fallthrough;
+        case 2:
+            header.pixel_format.green_bitmask = channel_mask << (1 * bits_per_channel);
+            fallthrough;
+        case 1:
+            header.pixel_format.red_bitmask = channel_mask;
         }
 
-        // For some reason red and blue channel bitmasks have to be swapped
-        // (only for RGBA)
-        if (img.channels == 4) {
+        switch (img.channels) {
+        case 4: {
+            // For some reason red and blue channel bitmasks have to be swapped
+            // (only for RGBA)
             const u32 temp = header.pixel_format.blue_bitmask;
             header.pixel_format.blue_bitmask = header.pixel_format.red_bitmask;
             header.pixel_format.red_bitmask = temp;
+            header.pixel_format.flags = DDPF_ALPHAPIXELS;
+            fallthrough;
+        }
+        case 3:
+            header.pixel_format.flags |= DDPF_RGB;
+            break;
+        case 2:
+            header.pixel_format.flags = DDPF_ALPHA;
+            fallthrough;
+        case 1:
+            header.pixel_format.flags |= DDPF_LUMINANCE;
+            break;
         }
     }
 
