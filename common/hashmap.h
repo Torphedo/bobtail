@@ -32,6 +32,11 @@ typedef u32 hashkey_t;
 /// @param entry_size The size of each object you'll be storing in the buckets. This can't be changed after creation.
 hashbuckets_desc hb_create(u32 num_buckets, u32 bucket_entries, u32 entry_size);
 
+/// @brief Clone a set of hashbuckets
+///
+/// @param desc The hashbuckets to clone
+hashbuckets_desc hb_clone(const hashbuckets_desc desc);
+
 /// @brief Destroy a set of hashbuckets
 void hb_destroy(hashbuckets_desc* desc);
 

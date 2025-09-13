@@ -9,11 +9,6 @@
 // Each entry in the buckets stores the hash, as well as the actual object
 #define HB_ENTRY_SIZE_BYTES(desc) ((desc)->entry_size + sizeof(hashkey_t))
 
-void hb_key_pos(const hashbuckets_desc* desc, u32 key, u32* bucket_out, u32* idx_out) {
-    *bucket_out = key % desc->num_buckets;
-    *idx_out = key / desc->bucket_entries;
-}
-
 /// @brief Create a new set of hashbuckets
 ///
 /// @param num_buckets The number of buckets in the set
@@ -29,12 +24,27 @@ hashbuckets_desc hb_create(u32 num_buckets, u32 bucket_entries, u32 entry_size) 
     };
 }
 
+hashbuckets_desc hb_clone(const hashbuckets_desc desc) {
+    const u32 bufsize = HB_ENTRY_SIZE_BYTES(&desc) * desc.bucket_entries * desc.num_buckets;
+    hashbuckets_desc out = hb_create(desc.num_buckets, desc.bucket_entries, desc.entry_size);
+
+    if (out.buckets) {
+        memcpy(out.buckets, desc.buckets, bufsize);
+    }
+
+    return out;
+}
+
 void hb_destroy(hashbuckets_desc* desc) {
     free(desc->buckets);
     *desc = (hashbuckets_desc){0};
 }
 
 void* hb_find_slot(const hashbuckets_desc* desc, hashkey_t key) {
+    if (desc->num_buckets == 0) {
+        return NULL;
+    }
+
     uintptr_t buckets = (uintptr_t)desc->buckets;
     u32 bucket_idx = key % desc->num_buckets;
 
@@ -64,17 +74,19 @@ void* hb_find_obj_direct(hashbuckets_desc* desc, hashkey_t hashkey) {
         }
     }
 
-    LOG_MSG(error, "Failed to find object with hash %d in buckets %p\n", hashkey, desc);
     return NULL;
 
 }
 
 bool hb_resize_buckets(hashbuckets_desc* desc, u32 bucket_entries) {
+    bucket_entries = MAX(1, bucket_entries);
+    const u32 num_buckets = MAX(1, desc->num_buckets);
+
     if (desc->bucket_entries == bucket_entries) {
         return true;
     }
 
-    hashbuckets_desc new_desc = hb_create(desc->num_buckets, bucket_entries, desc->entry_size);
+    hashbuckets_desc new_desc = hb_create(num_buckets, bucket_entries, desc->entry_size);
     if (!new_desc.buckets) {
         LOG_MSG(error, "Failed to allocate new buckets when resizing %d -> %d\n", desc->bucket_entries, bucket_entries);
         return false;
@@ -86,7 +98,7 @@ bool hb_resize_buckets(hashbuckets_desc* desc, u32 bucket_entries) {
     const uintptr_t oldbuf = (uintptr_t)desc->buckets;
     const bool shrinking = new_bucket_size < old_bucket_size;
 
-    for (u32 i = 0; i < desc->num_buckets; i++) {
+    for (u32 i = 0; i < num_buckets; i++) {
         const void* old_bucket = (void*)(oldbuf + old_bucket_size * i);
         void* new_bucket =       (void*)(newbuf + new_bucket_size * i);
         memcpy(new_bucket, old_bucket, MIN(old_bucket_size, new_bucket_size));
@@ -99,7 +111,7 @@ bool hb_resize_buckets(hashbuckets_desc* desc, u32 bucket_entries) {
             const s64 slots_left = (s64)new_desc.bucket_entries - slot_idx - 1;
             if (slots_left < 0) {
                 LOG_MSG(error, "Cancelling %d -> %d resize because %d entries in bucket %d won't fit\n",
-                        desc->num_buckets, new_desc.bucket_entries, -slots_left, i);
+                        num_buckets, new_desc.bucket_entries, -slots_left, i);
                 hb_destroy(&new_desc);
                 return false;
             }
@@ -128,7 +140,6 @@ bool hb_add_obj_direct(hashbuckets_desc* desc, hashkey_t hashkey, const void* ob
         return true;
     }
 
-    // TODO: Add a function to increase bucket size we can use in this case
     LOG_MSG(error, "Failed to insert object with hash %d into buckets %p\n", hashkey, desc);
     return false;
 }
