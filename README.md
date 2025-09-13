@@ -1,9 +1,7 @@
 # Bobtail
-This project is essentially my own mini standard library for C11. I ended up
-needing a lot of the same helper functions in most of my projects, so I finally
-stopped copy-pasting the files between projects and made it a separate repo.
-Not everything is unit-tested, but some of the more brittle parts are. 90% of
-the codebase is portable to C99, I only really use `static_assert` from C11.
+This project is essentially my own mini standard library for C11. The brittle
+parts (data structures) are unit-tested. The codebase is mostly C99, I only
+really use `static_assert` from C11.
 
 There are doxygen docs for the entire library, but if you're just browsing this
 repo, here's a quick overview:
@@ -37,21 +35,21 @@ repo, here's a quick overview:
 
 
 - "Virtual Files" [`common/vfile.h`]
-  - `stdio`-style API that acts on buffers of memory instead of files.
+  - `stdio`-style API that acts on buffers instead of files.
   - Has none of the alignment/size restrictions of anonymous memory-mapped files
 
 
-- Image/Texture Processing [`common/image.h`]
-  - Fairly simple API to handle image formats commonly used in DDS files. It's
-    essentially a simpler DDS structure that can express *most* image formats
-    expressable in DDS.
-  - Geared towards game texture formats used in graphics APIs, not everyday
-    formats like PNG or JPEG.
+- DDS Image Load/Save [`common/image.h`]
+  - Provides a simplified image structure that can express most common image
+    formats found in DDS files
+  - This is DDS-only, so it's mostly good for game textures and graphics APIs.
 
 
-- Dynamic List/Queue [`common/list.h` & `common/queue.h`]
-  - Exactly what they sound like. Pointers to individual elements may be
-  invalidated, and removing items is constant-time.
+- Containers [`common/buffer.h`, `common/list.h`, `common/queue.h`, & `common/hashmap.h`]
+  - Exactly what they sound like. Removing items is constant-time for the list
+    and queue.
+  - The hashmap has a C++ wrapper class in `common/cpp/hashmap.hxx`, which is
+    header-only so that the main library doesn't require a C++ compiler.
 
 
 - Reasonable Platform Macros [`common/platform.h`]
@@ -70,24 +68,18 @@ repo, here's a quick overview:
   - Unicode codepoint <-> UTF-8 translation
 
 
-- OpenGL Helpers [`common/shader.h` & `common/gl_debug.h` & `common/model.h`]
+- OpenGL Helpers [`common/shader.h` & `common/gl_debug.h`]
   - These all assume GLAD as their OpenGL header
-  - Shader Compilation
-    - Compile normal (vertex & fragment) shaders, check for errors, and print
-   error messages
+  - Shader compilation wrappers that automatically print errors
   - Debug Error Handler
     - Simple color-coded debug logger for OpenGL debug contexts
-    - Assumes GLFW is present (only to check for the extension)
-  - Models & Primitives
-    - `.obj` loader for simple meshes with only position & vertex color
-    - Pre-defined cube & quads
-    - Not generic by any means and specific to my needs, but probably a good
-    starting point if you know at least a little about vertex layout in OpenGL
+    - Assumes GLFW is present only to check for the debug context extension)
 
 
 - Hashing [`common/crc32.h` & `common/sha1.h`]
   - These are just public domain hash function implementations I re-use often.
     - CRC32 by Gary S. Brown, 1986
+    - CRC32-C has a SIMD implementation with a fallback software implementation
     - SHA-1 (slightly) adapted from RFC 3171
 
 
