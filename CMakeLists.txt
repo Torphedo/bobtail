@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
-project(bobtail C)
+project(bobtail C CXX)
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 11)
+
 # Emit a compile_commands.json for use with clangd in LSPs
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
@@ -59,6 +61,8 @@ target_include_directories(bobtail PUBLIC ${bobtail_SOURCE_DIR})
 if (BOBTAIL_TESTS)
     add_executable(bobtail_test
         ${test_sources}
+        test/test_hashmap.cxx
+
         test/test_crc32.c
         test/test_queue.c
         test/test_list.c
@@ -67,6 +71,6 @@ if (BOBTAIL_TESTS)
         test/test_sha1.c
         test/main.c
     )
-    target_include_directories(bobtail_test PUBLIC ${bobtail_SOURCE_DIR})
+    target_include_directories(bobtail_test PUBLIC "${bobtail_SOURCE_DIR}/common")
     target_link_libraries(bobtail_test PRIVATE bobtail)
 endif()
