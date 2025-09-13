@@ -48,7 +48,7 @@ void* hb_find_obj_direct(hashbuckets_desc* desc, hashkey_t hashkey);
 /// @param key The key to associate with the object
 /// @param obj The object to store. [desc->entry_size] bytes are copied from this pointer.
 static void* hb_find_obj(hashbuckets_desc* desc, const char* key) {
-    const u32 keyhash = crc32buf((const u8*)key, strlen(key));
+    const u32 keyhash = crc32fast((const u8*)key, strlen(key));
     return hb_find_obj_direct(desc, keyhash);
 }
 
@@ -66,7 +66,7 @@ bool hb_add_obj_direct(hashbuckets_desc* desc, hashkey_t hashkey, const void* ob
 /// @param key The key to associate with the object
 /// @param obj The object to store. [desc->entry_size] bytes are copied from this pointer.
 static bool hb_add_obj(hashbuckets_desc* desc, const char* key, const void* obj) {
-    const u32 keyhash = crc32buf((const u8*)key, strlen(key));
+    const u32 keyhash = crc32fast((const u8*)key, strlen(key));
     return hb_add_obj_direct(desc, keyhash, obj);
 }
 
@@ -89,13 +89,13 @@ do {                                           \
 /// @brief A helper to return the object directly instead of getting a pointer
 /// @param key The key string (not its hash!). The hash function is crc32.
 /// @param T The type of the stored object
-#define HB_FIND_VAL(desc, key, T) HB_FIND_VAL_DIRECT(desc, crc32buf((const u8*)(key), strlen(key)), T)
+#define HB_FIND_VAL(desc, key, T) HB_FIND_VAL_DIRECT(desc, crc32fast((const u8*)(key), strlen(key)), T)
 
 /// @brief A helper to store an object with no address (aka. an r-value).
 /// @param key The key string (not its hash!). The hash function is crc32.
 /// @param val The data to be stored
 /// @param T The type of [val]. sizeof(T) should match the entry size.
-#define HB_ADD_VAL(desc, key, val, T) HB_ADD_VAL_DIRECT(desc, crc32buf((const u8*)(key), strlen(key)), val, T)
+#define HB_ADD_VAL(desc, key, val, T) HB_ADD_VAL_DIRECT(desc, crc32fast((const u8*)(key), strlen(key)), val, T)
 
 #ifdef __cplusplus
 }
