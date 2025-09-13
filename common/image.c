@@ -8,6 +8,10 @@
 #include "file.h"
 #include "logging.h"
 
+// Most of these structures come from this MSDN page:
+// https://learn.microsoft.com/en-us/windows/win32/direct3ddds/dds-header
+
+
 typedef enum dds_flags {
     DDSD_CAPS        = 1 << 0,
     DDSD_HEIGHT      = 1 << 1,
@@ -27,6 +31,8 @@ typedef enum dds_caps_flags {
     DDSCAPS_TEXTURE = 0x00001000
 }dds_caps_flags;
 
+// See dwFlags table on MSDN:
+// https://learn.microsoft.com/en-us/windows/win32/direct3ddds/dds-pixelformat
 typedef enum dds_format_flags {
     DDPF_ALPHAPIXELS = 0x00000001,
     DDPF_ALPHA       = 0x00000002,
@@ -37,15 +43,36 @@ typedef enum dds_format_flags {
 }dds_format_flags;
 
 typedef enum {
+    DDSCAPS2_CUBEMAP           = (1 << 9),
+    DDSCAPS2_CUBEMAP_POSITIVEX = (1 << 10),
+    DDSCAPS2_CUBEMAP_NEGATIVEX = (1 << 11),
+    DDSCAPS2_CUBEMAP_POSITIVEY = (1 << 12),
+    DDSCAPS2_CUBEMAP_NEGATIVEY = (1 << 13),
+    DDSCAPS2_CUBEMAP_POSITIVEZ = (1 << 14),
+    DDSCAPS2_CUBEMAP_NEGATIVEZ = (1 << 15),
+
+    // Sorry this is so long
+    DDS_CUBEMAP_ALL_FACES = DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEX | DDSCAPS2_CUBEMAP_NEGATIVEX | DDSCAPS2_CUBEMAP_POSITIVEY | DDSCAPS2_CUBEMAP_NEGATIVEY | DDSCAPS2_CUBEMAP_POSITIVEZ | DDSCAPS2_CUBEMAP_NEGATIVEZ
+}dds_caps2_flags;
+
+typedef enum {
     DDS_DXT1 = MAGIC('D', 'X', 'T', '1'), // 'DXT1'
     DDS_DXT3 = MAGIC('D', 'X', 'T', '3'), // 'DXT3'
     DDS_DXT5 = MAGIC('D', 'X', 'T', '5'), // 'DXT5'
+    DDS_ATI1 = MAGIC('A', 'T', 'I', '1'), // 'ATI1'
     DDS_DX10 = MAGIC('D', 'X', '1', '0'), // 'DX10'
     DXT1_BLOCK_SIZE = 0x8,
     DXT3_BLOCK_SIZE = 0x10,
     DXT5_BLOCK_SIZE = 0x10
 }dds_bc_format;
 
+// HEAVILY abbreviated list from MSDN:
+// https://learn.microsoft.com/en-us/windows/win32/api/dxgiformat/ne-dxgiformat-dxgi_format
+typedef enum {
+    DXGI_FORMAT_BC1_UNORM_SRGB = 71,
+    DXGI_FORMAT_BC2_UNORM_SRGB = 75,
+    DXGI_FORMAT_BC3_UNORM_SRGB = 78,
+}dxgi_formats;
 
 typedef struct dds_pixel_format {
     u32 size; // Must be 32 (0x20)
@@ -59,11 +86,26 @@ typedef struct dds_pixel_format {
 }dds_pixel_format;
 static_assert(sizeof(dds_pixel_format) == 0x20, "dds_pixel_format size is wrong!");
 
-// We can't just strcmp() with "DDS" because it's 'DDS ' with no null
-// terminator.
+// Extended DDS header:
+// https://learn.microsoft.com/en-us/windows/win32/direct3ddds/dds-header-dxt10
+typedef struct {
+    u32 dxgi_format;
+    u32 resource_dimension; // Uses dds_resource_dimension enum
+    u32 misc_flags; // Set to FLAG_2D_TEXTURECUBE to indicate it's a cubemap.
+    u32 array_size; // # of textures, or # of cubemaps (6 textures each)
+    u32 misc_flags2; // New alpha settings
+}dx10_extended_format;
+
 typedef enum {
+    DIMENSION_1D = 2,
+    DIMENSION_2D = 3,
+    DIMENSION_3D = 4
+}dds_resource_dimension;
+
+enum {
     DDS_BEGIN = MAGIC('D', 'D', 'S', ' '), // 'DDS '
-}dds_const;
+    FLAG_2D_TEXTURECUBE = 4,
+};
 
 typedef struct dds_header {
     u32 identifier;   // DDS_BEGIN as defined above. aka "file magic" / "magic number".
@@ -71,6 +113,8 @@ typedef struct dds_header {
     u32 flags;
     u32 height;
     u32 width;
+    // For uncompressed textures, the size of the first row of pixels.
+    // For compressed textures, the size of the entire texture at mip level 0.
     u32 pitch_or_linear_size;
     u32 depth;
     u32 mipmap_count;
@@ -130,11 +174,12 @@ void img_write(texture img, const char* path) {
 
     dds_header header = mk_header(img.height, img.width, img.mip_level);
     if (img.compressed) {
+        // Compressed texture
         header.flags |= DDSD_LINEARSIZE;
         header.flags ^= DDSD_PITCH;
         u8 block_size = DXT1_BLOCK_SIZE;
 
-        // Handle each format
+        // Maybe we could make this a lookup table...
         switch (img.fmt) {
             case DXT1:
                 header.pixel_format.format_char_code = DDS_DXT1;
@@ -144,8 +189,8 @@ void img_write(texture img, const char* path) {
                 block_size = DXT3_BLOCK_SIZE;
                 break;
             case BC4:
+                header.pixel_format.format_char_code = DDS_ATI1;
                 block_size = DXT1_BLOCK_SIZE;
-                header.pixel_format.format_char_code = MAGIC('A', 'T', 'I', '1');
                 break;
             default:
                 header.pixel_format.format_char_code = DDS_DXT5;
@@ -156,15 +201,20 @@ void img_write(texture img, const char* path) {
         header.pitch_or_linear_size = dxt_pitch(img.height, img.width, block_size);
         header.pixel_format.flags = DDPF_FOURCC;
 
-        // tex_size = header.pitch_or_linear_size + ((img.mip_level - 1) * (header.pitch_or_linear_size * 0.333333f));
+        // This assumes no mipmaps
         tex_size = header.pitch_or_linear_size;
-    }
-    else {
+    } else {
+        // Uncompressed texture
+        const u32 bits_per_channel = 8 << img.unit_size;
         header.flags |= DDSD_PITCH;
-        u32 bits_per_channel = 8 << img.unit_size;
         header.pixel_format.bits_per_pixel = bits_per_channel * img.channels;
-        // Kind of magic pitch formula, I think it comes from MSDN.
+
+        // I don't completely understand this formula, but it works and the one
+        // I wrote myself didn't. It comes from MSDN:
+        // https://learn.microsoft.com/en-us/windows/win32/direct3ddds/dx-graphics-dds-pguide
         header.pitch_or_linear_size = (img.width * header.pixel_format.bits_per_pixel + 7) / 8;
+
+        // This assumes no mipmaps
         tex_size = header.pitch_or_linear_size * img.height;
 
         header.pixel_format.flags |= DDPF_RGB;
@@ -245,7 +295,7 @@ texture image_buf_load(const char* filename, u8* img_buf, u32 buf_size) {
         return img;
     }
 
-    // 0xCC bytes separate pixels with missing data from black pixels
+    // 0xCC bytes help separate pixels with missing data from black pixels
     memset(img.data, 0xCC, buf_size);
     if (!is_dds(filename)) {
         // Load raw image data
@@ -270,7 +320,7 @@ texture image_buf_load(const char* filename, u8* img_buf, u32 buf_size) {
     img.height = header.height;
 
     // Only inherit the mip count if the flag in the header is set
-    bool has_mipmapcount = ((header.flags & DDSD_MIPMAPCOUNT) != 0);
+    const bool has_mipmapcount = ((header.flags & DDSD_MIPMAPCOUNT) != 0);
     img.mip_level = header.mipmap_count * has_mipmapcount;
 
     // Presence of FOURCC flag indicates a compressed texture format
