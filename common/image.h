@@ -44,9 +44,7 @@ typedef struct {
     bool compressed;
     img_fmt_compressed fmt;
 
-    /// @brief The size of each channel (Only used if uncompressed, see detailed description)
-    ///
-    /// 0 = u8, 1 = u16, 2 = u32
+    /// @brief The number of bytes per channel (Only used if uncompressed, see detailed description)
     u8 unit_size;
     /// @brief Number of uncompressed color channels
     u8 channels;

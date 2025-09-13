@@ -157,7 +157,7 @@ void img_snap(texture* img, u32 size) {
 
 // Check for a set of flags in a 32-bit bitfield using the provided mask.
 bool has_flag(u32 input, u32 flag) {
-    return (input ^ flag) != input;
+    return (input & flag) != 0;
 }
 
 // For a compressed texture (like DXTn), pitch is the size in bytes of the
@@ -208,7 +208,7 @@ void img_write(texture img, const char* path) {
         tex_size = header.pitch_or_linear_size;
     } else {
         // Uncompressed texture
-        const u32 bits_per_channel = 8 << img.unit_size;
+        const u32 bits_per_channel = 8 * img.unit_size;
         header.flags |= DDSD_PITCH;
         header.pixel_format.bits_per_pixel = bits_per_channel * img.channels;
 
@@ -333,20 +333,34 @@ texture image_buf_load(const char* filename, u8* img_buf, u32 buf_size) {
 
     // Presence of FOURCC flag indicates a compressed texture format
     img.compressed = ((header.pixel_format.flags & DDPF_FOURCC) != 0);
+    if (img.compressed) {
     u32 dxt_n = header.pixel_format.format_char_code;
-    switch (dxt_n) {
-        case DDS_DXT5:
-            img.fmt = DXT3;
-            break;
-        case DDS_DXT3:
-            img.fmt = DXT5;
-            break;
-        default:
-            img.fmt = DXT1;
-            break;
-    };
+        switch (dxt_n) {
+            case DDS_DXT5:
+                img.fmt = DXT3;
+                break;
+            case DDS_DXT3:
+                img.fmt = DXT5;
+                break;
+            default:
+                img.fmt = DXT1;
+                break;
+        };
+    } else {
+        const u8 alpha = has_flag(header.pixel_format.flags, DDPF_ALPHA);
+        const u8 alpha_pixels = has_flag(header.pixel_format.flags, DDPF_ALPHAPIXELS);
+        const u8 luminance = has_flag(header.pixel_format.flags, DDPF_LUMINANCE);
+        const u8 rgb = has_flag(header.pixel_format.flags, DDPF_RGB);
+        img.channels = alpha_pixels + alpha + luminance + (3 * rgb);
+        if (img.channels < 1 || img.channels > 4) {
+            LOG_MSG(error, "Your image has %d channels, which doesn't make sense. Double-check your pixel format flags?\n", img.channels);
+            img.channels = 1;
+            LOG_MSG(info, "I'm loading the image anyway, as if it had %d channels.\n", img.channels);
+        }
+
+        img.unit_size = header.pixel_format.bits_per_pixel / 8;
+    }
      
-    // TODO: set channel count for uncompressed textures
     return img;
 }
 
