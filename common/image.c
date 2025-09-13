@@ -176,13 +176,16 @@ void img_write(texture img, const char* path) {
     if (img.compressed) {
         // Compressed texture
         header.flags |= DDSD_LINEARSIZE;
-        header.flags ^= DDSD_PITCH;
         u8 block_size = DXT1_BLOCK_SIZE;
 
         // Maybe we could make this a lookup table...
         switch (img.fmt) {
+            default:
+                LOG_MSG(warning, "Unknown compressed texture format %d, assuming DXT1.\n", img.fmt);
+                fallthrough;
             case DXT1:
                 header.pixel_format.format_char_code = DDS_DXT1;
+                block_size = DXT1_BLOCK_SIZE;
                 break;
             case DXT3:
                 header.pixel_format.format_char_code = DDS_DXT3;
@@ -192,7 +195,7 @@ void img_write(texture img, const char* path) {
                 header.pixel_format.format_char_code = DDS_ATI1;
                 block_size = DXT1_BLOCK_SIZE;
                 break;
-            default:
+            case DXT5:
                 header.pixel_format.format_char_code = DDS_DXT5;
                 block_size = DXT5_BLOCK_SIZE;
                 break;
@@ -217,42 +220,46 @@ void img_write(texture img, const char* path) {
         // This assumes no mipmaps
         tex_size = header.pitch_or_linear_size * img.height;
 
-        header.pixel_format.flags |= DDPF_RGB;
+        switch (img.channels) {
+            case 4:
+                header.pixel_format.flags = DDPF_ALPHAPIXELS;
+                fallthrough;
+            case 3:
+                header.pixel_format.flags |= DDPF_RGB;
+                break;
+            case 2:
+                header.pixel_format.flags = DDPF_LUMINANCE;
+                fallthrough;
+            case 1:
+                header.pixel_format.flags |= DDPF_ALPHA;
+                break;
+        }
+
+        // 0xFF for 8-bit, 0xFFFF for 16-bit, etc.
+        const u32 channel_mask = UINT32_MAX >> (32 - bits_per_channel);
+
+        // This is a bit overly generic, but I thought this was easier to follow
+        // than multiple branches.
+        switch (img.channels) {
+            case 4:
+                header.pixel_format.alpha_bitmask = channel_mask << (3 * bits_per_channel);
+                fallthrough;
+            case 3:
+                header.pixel_format.blue_bitmask = channel_mask << (2 * bits_per_channel);
+                fallthrough;
+            case 2:
+                header.pixel_format.green_bitmask = channel_mask << (1 * bits_per_channel);
+                fallthrough;
+            case 1:
+                header.pixel_format.red_bitmask = channel_mask;
+        }
+
+        // For some reason red and blue channel bitmasks have to be swapped
+        // (only for RGBA)
         if (img.channels == 4) {
-            header.pixel_format.flags |= DDPF_ALPHAPIXELS;
-        }
-        // if (img.channels == 2) {
-        //     header.pixel_format.flags = DDPF_ALPHAPIXELS | DDPF_LUMINANCE;
-        // }
-
-        if (img.unit_size == 1) {
-            // 16-bit
-            header.pixel_format.red_bitmask = 0xFFFF;
-            if (img.channels > 1) {
-                header.pixel_format.green_bitmask = 0xFFFF << 16;
-            }
-        }
-        else {
-            switch (img.channels) {
-                // Fallthrough is intentional here
-                case 4:
-                    header.pixel_format.alpha_bitmask = 0xFF << 24;
-                case 3:
-                    header.pixel_format.blue_bitmask = 0xFF << 16;
-                case 2:
-                    header.pixel_format.green_bitmask = 0xFF << 8;
-                case 1:
-                    header.pixel_format.red_bitmask = 0xFF;
-            }
-
-            // For some reason red and blue channel bitmasks have to be swapped
-            // (only for RGBA)
-            if (img.channels == 4) {
-                const u32 temp = header.pixel_format.blue_bitmask;
-                header.pixel_format.blue_bitmask = header.pixel_format.red_bitmask;
-                header.pixel_format.red_bitmask = temp;
-            }
-
+            const u32 temp = header.pixel_format.blue_bitmask;
+            header.pixel_format.blue_bitmask = header.pixel_format.red_bitmask;
+            header.pixel_format.red_bitmask = temp;
         }
     }
 
