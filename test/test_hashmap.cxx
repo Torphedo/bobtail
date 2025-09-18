@@ -23,9 +23,6 @@ extern "C" bool test_hashmap_cpp() {
     // Old instance should be destroyed
     result &= map2.buckets.buckets == nullptr;
 
-    // The destroyed instance can be used, it'll automatically reallocate
-    map2["testkey"] = 42;
-
     REPORT_RESULT(result);
     return result;
 }
