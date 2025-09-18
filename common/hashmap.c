@@ -123,6 +123,33 @@ bool hb_resize_buckets(hashbuckets_desc* desc, u32 bucket_entries) {
     return true;
 }
 
+bool hb_increase_buckets(hashbuckets_desc* desc, u32 num_buckets) {
+    if (num_buckets == desc->num_buckets) {
+        return true;
+    }
+
+    hashbuckets_desc new_map = hb_create(num_buckets, desc->bucket_entries, desc->entry_size);
+    if (new_map.buckets == NULL) {
+        return false;
+    }
+    const u32 entry_size = HB_ENTRY_SIZE_BYTES(desc);
+    const u32 num_entries = desc->bucket_entries * desc->num_buckets;
+    for (u32 i = 0; i < num_entries; i++) {
+        const uintptr_t entry = ((uintptr_t)desc->buckets) + (i * entry_size);
+        const u32* hash = (void*)entry;
+        const void* obj = (void*)(&hash[1]);
+
+        if (!hb_add_obj_direct(desc, *hash, obj)) {
+            hb_destroy(&new_map);
+            return false;
+        }
+    }
+
+    hb_destroy(desc);
+    *desc = new_map;
+    return true;
+}
+
 bool hb_add_obj_direct(hashbuckets_desc* desc, hashkey_t hashkey, const void* obj) {
     void* entry = hb_find_slot(desc, hashkey);
     if (!entry) {

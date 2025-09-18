@@ -35,6 +35,9 @@ bool test_hashmap() {
         goto hb_end;
     }
 
+    // Everything should still work after changing bucket count
+    hb_increase_buckets(&buckets, 20);
+
     if (fetch != 42) {
         printf("First recalled value %d doesn't match stored value %d\n", fetch, 42);
         result = false;

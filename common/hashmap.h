@@ -52,7 +52,15 @@ static void* hb_find_obj(hashbuckets_desc* desc, const char* key) {
     return hb_find_obj_direct(desc, keyhash);
 }
 
+/// @brief Expand or shrink all buckets
+/// @param desc The hashbuckets to edit
+/// @param bucket_entries The new size of each bucket
 bool hb_resize_buckets(hashbuckets_desc* desc, u32 bucket_entries);
+
+/// @brief Increase the number of buckets and rehash
+/// @param desc The hashbuckets to edit
+/// @param num_buckets The new bucket count
+bool hb_increase_buckets(hashbuckets_desc* desc, u32 num_buckets);
 
 /// @brief Store an object and associate it with a key hash
 ///
