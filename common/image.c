@@ -61,6 +61,7 @@ typedef enum {
     DDS_DXT5 = MAGIC('D', 'X', 'T', '5'), // 'DXT5'
     DDS_ATI1 = MAGIC('A', 'T', 'I', '1'), // 'ATI1'
     DDS_DX10 = MAGIC('D', 'X', '1', '0'), // 'DX10'
+    DDS_FLOAT = 114,
     DXT1_BLOCK_SIZE = 0x8,
     DXT3_BLOCK_SIZE = 0x10,
     DXT5_BLOCK_SIZE = 0x10
@@ -341,6 +342,9 @@ texture image_buf_load(const char* filename, u8* img_buf, u32 buf_size) {
                 break;
             case DDS_DXT3:
                 img.fmt = DXT5;
+                break;
+            case DDS_FLOAT:
+                img.fmt = DDS_FORMAT_FLOAT;
                 break;
             default:
                 img.fmt = DXT1;

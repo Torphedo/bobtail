@@ -19,6 +19,9 @@ typedef enum {
     DXT5,
     /// Greyscale at 4 bits per pixel (8 bytes per 4x4 block)
     BC4,
+
+    /// This is considered compressed
+    DDS_FORMAT_FLOAT,
     /// Not a real enum value. Increment then modulo by this to cycle through formats
     DXT_ENUM_MAX,
 } img_fmt_compressed;
