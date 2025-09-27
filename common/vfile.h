@@ -77,11 +77,11 @@ void* vfile_cur(vfile file);
 #define VFILE_WRITE(T, file, val)                         \
     do {                                                  \
         if (vfile_opcheck(file, sizeof(T))) {             \
-            *((T)*)(&(file)->ptr[(file)->pos]) = (val);   \
+            *(T*)(&(file)->ptr[(file)->pos]) = (val);     \
             const u32 _newpos = (file)->pos + sizeof(T);  \
             (file)->pos = MIN(_newpos, (file)->size - 1); \
         } else {                                          \
-            LOG_MSG(warning, "write @ 0x%x / 0x%x would be out of bounds [%d bytes]\n", file->pos, file->size, writesize); \
+            LOG_MSG(warning, "write @ 0x%x / 0x%x would be out of bounds [%d bytes]\n", (file)->pos, (file)->size, sizeof(T)); \
         }                                                 \
     } while (0)
 // The MIN() keeps us from advancing past EOF
