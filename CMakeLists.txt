@@ -43,6 +43,8 @@ add_library(bobtail STATIC
     common/queue.c
     common/hashmap.c
 
+    common/parsing.c
+
     # Files for other platforms will just be empty and compile instantly
     common/vmem_posix.c
     common/vmem_windows.c
@@ -70,6 +72,7 @@ if (BOBTAIL_TESTS)
         test/test_vmem.c
         test/test_sha1.c
         test/main.c
+        test/test_parsing.c
     )
     target_include_directories(bobtail_test PUBLIC "${bobtail_SOURCE_DIR}/common")
     target_link_libraries(bobtail_test PRIVATE bobtail)
