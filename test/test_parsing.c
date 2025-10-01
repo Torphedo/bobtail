@@ -25,7 +25,7 @@ const parse_test_case cases[] = {
             "}",
         },
         .num_tokens = 24,
-        .char_operators = WHITESPACE "#()/*+-);{},<>.\"\"",
+        .char_operators = "#()/*+-);{},<>.\"\"",
         .operators = (const char* []) {
             "->",
         },
@@ -37,7 +37,6 @@ const parse_test_case cases[] = {
             "a", "simpler", "example",
         },
         .num_tokens = 3,
-        .char_operators = WHITESPACE,
     },
 };
 

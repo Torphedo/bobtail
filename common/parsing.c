@@ -3,7 +3,7 @@
 
 const char* blank_ops[] = {};
 
-queue shatter_str(const char* text, s64 len, const char* char_ops, const char** operators, u32 num_operators) {
+queue shatter_str(const char* text, s64 len, const char* char_ops, const char* const* operators, u32 num_operators) {
     if (!char_ops) {
         char_ops = "";
     }
