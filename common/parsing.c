@@ -1,5 +1,6 @@
 #include "parsing.h"
 #include <ctype.h>
+#include <assert.h>
 
 const char* blank_ops[] = {};
 
@@ -26,15 +27,16 @@ queue shatter_str(const char* text, s64 len, const char* char_ops, const char* c
     queue out = queue_create(5, sizeof(substr_t));
     s32 last_token_end = 0;
     for (s32 i = 0; i < len; i++) {
-        const u32 prev_pos = MAX(0, i - 1);
+        const s32 prev_pos = MAX(0, i - 1);
         const char cur_ch = text[i];
         const char prev_ch = text[prev_pos];
 
         for (u32 j = 0; j < num_operators; j++) {
             const char* op = operators[j];
+            assert(strlen(op) < INT16_MAX && "What on earth are you doing over there?");
             if (strncmp(&text[prev_pos], op, strlen(op)) == 0) {
                 last_token_end = prev_pos;
-                i += strlen(op) - 1;
+                i += (s32)strlen(op) - 1;
                 break;
             }
         }
