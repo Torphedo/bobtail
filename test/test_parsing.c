@@ -1,9 +1,9 @@
 #include <common/logging.h>
 #include <common/int.h>
+#include <common/queue.h>
+#include <common/parsing.h>
 
 #include "testing.h"
-#include "queue.h"
-#include "parsing.h"
 
 typedef struct {
     const char* text;
@@ -31,7 +31,7 @@ const parse_test_case cases[] = {
         },
         .num_ops = 1,
     },
-{
+    {
         .text = "a simpler example",
         .tokens = (const char* []) {
             "a", "simpler", "example",
@@ -46,26 +46,21 @@ bool test_parsing() {
     for (u32 k = 0; k < ARRAY_SIZE(cases); k++) {
         const parse_test_case c = cases[k];
 
-        queue sample_tok_q = queue_create(c.num_tokens, sizeof(substr_t));
-        for (u32 i = 0; i < c.num_tokens; i++) {
-            const substr_t tok = {c.tokens[i], strlen(c.tokens[i])};
-            queue_add(&sample_tok_q, &tok);
-        }
-
         queue tokens = shatter_str(c.text, strlen(c.text), c.char_operators, c.operators, c.num_ops);
+        u32 i = 0;
         while (!queue_empty(tokens)) {
             substr_t token = {0};
-            substr_t sample_token = {0};
             queue_get(&tokens, &token);
-            queue_get(&sample_tok_q, &sample_token);
-            if (token.length != sample_token.length) {
-                LOG_MSG(error, "Token length mismatch!\n");
+            const char* expected_token = c.tokens[i++];
+            if (token.length != strlen(expected_token)) {
+                LOG_MSG(error, "Token length mismatch (expected %d, got %d)!\n", strlen(expected_token), token.length);
                 result = false;
                 break;
             }
 
-            if (strncmp(token.data, sample_token.data, token.length) != 0) {
-                LOG_MSG(error, "Token mismatch!\n");
+            const char* actual_token = c.text + token.offset;
+            if (strncmp(actual_token, expected_token, token.length) != 0) {
+                LOG_MSG(error, "Token mismatch (expected '%s', got '%.*s')!\n", expected_token, token.length, actual_token);
                 result = false;
                 break;
             }

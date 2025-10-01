@@ -51,10 +51,9 @@ queue shatter_str(const char* text, s64 len, const char* char_ops, const char* c
             is_token_end = true; // End token when we hit reserved char
         }
 
-        const char* token_begin = &text[last_token_end];
         const s32 token_len = i - last_token_end;
         if (is_token_end && token_len > 0) {
-            const substr_t tok = {.data = token_begin, .length = token_len};
+            const substr_t tok = {.offset = last_token_end, .length = token_len};
             queue_add(&out, &tok);
             last_token_end = i;
         }
@@ -62,9 +61,8 @@ queue shatter_str(const char* text, s64 len, const char* char_ops, const char* c
 
     // Make the rest of the string a token
     const u32 token_len = MAX(0, len - last_token_end);
-    const char* token_begin = &text[last_token_end];
     if (token_len > 0) {
-        const substr_t tok = {.data = token_begin, .length = token_len};
+        const substr_t tok = {.offset = last_token_end, .length = token_len};
         queue_add(&out, &tok);
     }
 

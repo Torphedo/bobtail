@@ -5,7 +5,7 @@
 #include <common/int.h>
 
 typedef struct {
-    const char* data;
+    s32 offset;
     u32 length;
 }substr_t;
 
