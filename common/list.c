@@ -7,7 +7,7 @@
 #include "list.h"
 
 u32 list_maxidx(list l) {
-    return (l.buf.alloc_size / l.element_size) - 1;
+    return list_size(l) - 1;
 }
 
 bool list_full(list l) {
@@ -28,6 +28,10 @@ list list_create(u32 init_size, u32 element_size) {
 void list_destroy(list* l) {
     buf_destroy(&l->buf);
     *l = (list){0};
+}
+
+u32 list_size(list l) {
+    return (l.buf.alloc_size / l.element_size);
 }
 
 void list_add(list* l, const void* data) {

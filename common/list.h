@@ -52,6 +52,10 @@ list list_create(u32 init_size, u32 element_size);
 /// @sa list_create
 void list_destroy(list* l);
 
+/// @brief Find out how many elements the list has
+/// @param l List to query
+u32 list_size(list l);
+
 /// @brief Append an element to the list.
 /// @param l The list to modify
 /// @param data The data to append. Must be at least @ref list.element_size
