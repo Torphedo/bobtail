@@ -79,10 +79,6 @@ void print_c16s(const c16* str);
 /// Can only be used on arrays with compile-time known sizes
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(*(arr)))
 
-// Used to make a no-op "fallthrough;" statement in switch statements, which
-// only indicates to the programmer that the fallthrough is intentional.
-#define fallthrough
-
 #ifdef __cplusplus
 }
 #endif
