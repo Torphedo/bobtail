@@ -183,7 +183,7 @@ void img_write(texture img, const char* path) {
         switch (img.fmt) {
             default:
                 LOG_MSG(warning, "Unknown compressed texture format %d, assuming DXT1.\n", img.fmt);
-                fallthrough;
+                // fallthrough
             case DXT1:
                 header.pixel_format.format_char_code = DDS_DXT1;
                 block_size = DXT1_BLOCK_SIZE;
@@ -229,13 +229,13 @@ void img_write(texture img, const char* path) {
         switch (img.channels) {
         case 4:
             header.pixel_format.alpha_bitmask = channel_mask << (3 * bits_per_channel);
-            fallthrough;
+            // fallthrough
         case 3:
             header.pixel_format.blue_bitmask = channel_mask << (2 * bits_per_channel);
-            fallthrough;
+            // fallthrough
         case 2:
             header.pixel_format.green_bitmask = channel_mask << (1 * bits_per_channel);
-            fallthrough;
+            // fallthrough
         case 1:
             header.pixel_format.red_bitmask = channel_mask;
         }
@@ -248,7 +248,7 @@ void img_write(texture img, const char* path) {
             header.pixel_format.blue_bitmask = header.pixel_format.red_bitmask;
             header.pixel_format.red_bitmask = temp;
             header.pixel_format.flags = DDPF_ALPHAPIXELS;
-            fallthrough;
+            // fallthrough
         }
         case 3:
             header.pixel_format.flags |= DDPF_RGB;
@@ -258,7 +258,7 @@ void img_write(texture img, const char* path) {
             header.pixel_format.alpha_bitmask = header.pixel_format.green_bitmask;
             header.pixel_format.green_bitmask = 0;
             header.pixel_format.flags = DDPF_ALPHAPIXELS;
-            fallthrough;
+            // fallthrough
         case 1:
             header.pixel_format.flags |= DDPF_LUMINANCE;
             break;
