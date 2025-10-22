@@ -2,7 +2,7 @@
 #include <ctype.h>
 #include <assert.h>
 
-const char* blank_ops[] = {};
+const char* blank_ops[] = {0};
 
 queue shatter_str(const char* text, s64 len, const char* char_ops, const char* const* operators, u32 num_operators) {
     if (!char_ops) {
