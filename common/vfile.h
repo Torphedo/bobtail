@@ -43,9 +43,23 @@ void vfile_seek(vfile* file, u32 size);
 /// This basically just hides some pointer casts.
 void* vfile_cur(vfile file);
 
+
+/// @brief Like @ref vfile_cur(), but advances [pos].
+///
+/// For example:
+/// @code
+/// vfile f = ...;
+/// const u32 data = VFILE_READ(u32, f);
+/// @endcode
+///
+/// @param T The data type to read
+/// @param file a @ref vfile structure to read from
+/// @return equivalent value to (T*)vfile_cur(file)
+/// type @p T.
+#define VFILE_READ_PTR(T, file) ((T*)(&(file)->ptr[((file)->pos += sizeof(T)) - sizeof(T)]))
+
 /// @brief Read data from a virtual file.
 ///
-/// Any type that can be pointer-dereferenced works (should support structs)
 /// For example:
 /// @code
 /// vfile f = ...;
@@ -57,7 +71,7 @@ void* vfile_cur(vfile file);
 /// @return The requested data is returned as if this was a function of return
 /// type @p T.
 // TODO: Use MIN() here to avoid reading out of bounds
-#define VFILE_READ(T, file) (*(T*)(&(file)->ptr[((file)->pos += sizeof(T)) - sizeof(T)]))
+#define VFILE_READ(T, file) (*VFILE_READ_PTR(T, file))
 
 /// @brief Write data to a virtual file.
 ///
