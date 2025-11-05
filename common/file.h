@@ -48,6 +48,8 @@ static inline u32 magic(char a, char b, char c, char d) {
 /// Same as @ref magic(), but can be used in constants (good for enums)
 #define MAGIC(a, b, c, d) ((u32)a | ((u32)b << 8) | ((u32)c << 16) | ((u32)d << 24))
 
+bool file_has_magic(const char* path, u32 magic);
+
 #ifdef __cplusplus
 }
 #endif

@@ -87,3 +87,20 @@ bool file_load_existing(const char* path, u8* buf, u32 size) {
     return true;
 }
 
+bool file_has_magic(const char* path, u32 magic) {
+    if (file_size(path) < sizeof(magic)) {
+        return false;
+    }
+
+    FILE* f = fopen(path, "rb");
+    if (!f) {
+        return false;
+    }
+
+    u32 val = 0;
+    fread(&val, sizeof(val), 1, f);
+    fclose(f);
+
+    return val == magic;
+}
+
