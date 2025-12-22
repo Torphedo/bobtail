@@ -43,6 +43,12 @@ void vfile_seek(vfile* file, u32 size);
 /// This basically just hides some pointer casts.
 void* vfile_cur(vfile file);
 
+/// @brief Read bytes into a buffer
+/// @param file The file to read from
+/// @param buf Buffer to copy data into
+/// @param size The number of bytes to copy
+/// @return The number of bytes that were copied
+u64 vfile_read_bytes(vfile* file, void* buf, u32 size);
 
 /// @brief Like @ref vfile_cur(), but advances [pos].
 ///
