@@ -65,4 +65,3 @@ void path_get_filename(const char* path, char* output);
 char* get_self_path(const char* argv_0);
 
 EXTERN_C_END
-#endif // #ifndef PATH_H
