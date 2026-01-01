@@ -1,4 +1,6 @@
 #pragma once
+#include "util.h"
+EXTERN_C_BEGIN
 #include <string.h>
 #include "queue.h"
 
@@ -19,3 +21,5 @@ typedef struct {
 /// @param num_operators The number of multi-character operators
 /// @return A queue of tokens
 queue shatter_str(const char* text, s64 len, const char* char_ops, const char* const* operators, u32 num_operators);
+
+EXTERN_C_END

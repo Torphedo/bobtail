@@ -1,8 +1,7 @@
 #ifndef FILE_H
 #define FILE_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file file.h
 /// @brief Utilities for dealing with the filesystem
 
@@ -50,7 +49,5 @@ static inline u32 magic(char a, char b, char c, char d) {
 
 bool file_has_magic(const char* path, u32 magic);
 
-#ifdef __cplusplus
-}
-#endif
+EXTERN_C_END
 #endif // #ifndef FILE_H

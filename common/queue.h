@@ -1,8 +1,7 @@
 #ifndef QUEUE_H
 #define QUEUE_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file queue.h
 /// @brief An auto-expanding dynamic queue implementation
 ///
@@ -68,7 +67,5 @@ void queue_clear(queue* q);
 /// Check whether the queue is empty
 bool queue_empty(queue q);
 
-#ifdef __cplusplus
-}
-#endif
+EXTERN_C_END
 #endif // #ifndef QUEUE_H

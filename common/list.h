@@ -1,8 +1,7 @@
 #ifndef LIST_H
 #define LIST_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file list.h
 /// @brief Automatically expanding dynamic list
 /// @warning Don't keep pointers / indices to elements of the list for any
@@ -112,7 +111,5 @@ bool list_contains(list l, const void* data);
 /// @brief Whether the list is empty
 bool list_empty(list l);
 
-#ifdef __cplusplus
-}
-#endif
+EXTERN_C_END
 #endif // #ifndef LIST_H

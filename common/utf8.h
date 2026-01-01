@@ -1,8 +1,7 @@
 #ifndef UTF8_H
 #define UTF8_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file utf8.h
 /// @brief Functions for handling Unicode codepoints and UTF-8
 // This file might get renamed to "unicode.h" later, if I add UTF-16/UCS-2
@@ -167,7 +166,5 @@ static u32 utf8_codepoint(const char* bytes, u8* length_out) {
     return codepoint;
 }
 
-#ifdef __cplusplus
-}
-#endif
+EXTERN_C_END
 #endif // UTF8_H

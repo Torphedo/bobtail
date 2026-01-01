@@ -1,8 +1,7 @@
 #ifndef CRC32_H
 #define CRC32_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "util.h"
+EXTERN_C_BEGIN
 
 #include "int.h"
 
@@ -39,7 +38,5 @@ u32 software_crc32c(const u8* buf, u64 len);
 // Always calls the fastest available variant of CRC32.
 #define crc32fast crc32c
 
-#ifdef __cplusplus
-}
-#endif
+EXTERN_C_END
 #endif // #ifndef CRC32_H

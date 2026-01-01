@@ -1,8 +1,7 @@
 #ifndef HASHMAP_H
 #define HASHMAP_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "util.h"
+EXTERN_C_BEGIN
 
 #include <stdbool.h>
 #include <string.h>
@@ -105,7 +104,5 @@ do {                                           \
 /// @param T The type of [val]. sizeof(T) should match the entry size.
 #define HB_ADD_VAL(desc, key, val, T) HB_ADD_VAL_DIRECT(desc, crc32fast((const u8*)(key), strlen(key)), val, T)
 
-#ifdef __cplusplus
-}
-#endif
+EXTERN_C_END
 #endif // #ifndef HASHMAP_H

@@ -1,8 +1,7 @@
 #ifndef IMAGE_H
 #define IMAGE_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file image.h
 /// @brief Utilities for handling raw and formatted image data
 
@@ -62,7 +61,5 @@ void img_write(texture img, const char* path);
 /// Load a DDS from disk
 texture image_buf_load(const char* filename, u8* img_buf, u32 buf_size);
 
-#ifdef __cplusplus
-}
-#endif
+EXTERN_C_END
 #endif // #ifndef IMAGE_H

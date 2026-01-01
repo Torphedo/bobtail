@@ -1,8 +1,7 @@
 #ifndef VMEM_H
 #define VMEM_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file vmem.h
 /// @brief Cross-platform virtual memory utilities
 /// @author Greenlord/S41L0R (Nintendo Switch implementation)
@@ -76,7 +75,5 @@ int vmem_commit(void* addr, u64 size);
 /// @return 0 on success, -1 on failure.
 int vmem_free(void* addr, u64 size);
 
-#ifdef __cplusplus
-}
-#endif
+EXTERN_C_END
 #endif // VMEM_H

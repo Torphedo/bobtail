@@ -1,8 +1,7 @@
 #ifndef BUFFER_H
 #define BUFFER_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file buffer.h
 /// @brief Resizable buffer
 /// @warning Don't keep pointers to the contents of the buffer if you resize
@@ -44,7 +43,5 @@ bool buf_empty(buffer_t buf);
 /// @param wipe_on_alloc Whether to fill the buffer with 0 or leave it uninitialized.
 bool buf_resize(buffer_t* buf, u64 new_size, bool wipe_on_alloc);
 
-#ifdef __cplusplus
-}
-#endif
+EXTERN_C_END
 #endif // #ifndef BUFFER_H

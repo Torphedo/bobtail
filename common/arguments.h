@@ -1,7 +1,6 @@
 #pragma once
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file arguments.h
 /// Very basic argument parsing, mostly to extract input and output filepaths.
 
@@ -51,6 +50,4 @@ typedef struct {
 /// @return Returns a @ref flags structure
 flags parse_arguments(int argc, char** argv, const char* args[], u32 args_count);
 
-#ifdef __cplusplus
-}
-#endif
+EXTERN_C_END

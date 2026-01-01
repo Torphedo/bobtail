@@ -1,8 +1,7 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file platform.h
 /// @brief Simple definitions to find out the target platform
 ///
@@ -53,7 +52,5 @@ extern "C" {
     #define PLATFORM_DIRSEP ('/')
 #endif
 
-#ifdef __cplusplus
-}
-#endif
+EXTERN_C_END
 #endif // #ifndef PLATFORM_H

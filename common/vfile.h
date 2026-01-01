@@ -1,8 +1,7 @@
 #ifndef VFILE_H
 #define VFILE_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file vfile.h
 /// @brief A stdio-style interface that can treat memory like a file stream
 
@@ -107,7 +106,5 @@ u64 vfile_read_bytes(vfile* file, void* buf, u32 size);
 // The MIN() keeps us from advancing past EOF
 // The do-while loop forces you to use a semicolon when calling the macro
 
-#ifdef __cplusplus
-}
-#endif
+EXTERN_C_END
 #endif // #ifndef VFILE_H

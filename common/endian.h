@@ -1,8 +1,7 @@
 #ifndef ENDIAN_H
 #define ENDIAN_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file endian.h
 /// @brief Utilities for handling endianness
 ///
@@ -62,7 +61,5 @@ do {                                  \
     memcpy(&(val), ((u8*)&v) + 1, 3); \
 } while(0)
 
-#ifdef __cplusplus
-}
-#endif
+EXTERN_C_END
 #endif // ENDIAN_H

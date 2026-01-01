@@ -1,8 +1,7 @@
 #ifndef PATH_H
 #define PATH_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file path.h
 /// @brief Utilities for working with filepaths
 
@@ -66,7 +65,5 @@ void path_get_filename(const char* path, char* output);
 /// string.
 char* get_self_path(const char* argv_0);
 
-#ifdef __cplusplus
-}
-#endif
+EXTERN_C_END
 #endif // #ifndef PATH_H
