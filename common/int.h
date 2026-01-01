@@ -1,5 +1,4 @@
-#ifndef INT_H
-#define INT_H
+#pragma once
 #include "util.h"
 EXTERN_C_BEGIN
 /// @file int.h
@@ -61,4 +60,3 @@ float reflect(float val, float axis);
 void print_c16s(const c16* str);
 
 EXTERN_C_END
-#endif // INT_H

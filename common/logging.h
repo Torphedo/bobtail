@@ -1,5 +1,4 @@
-#ifndef LOGGING_H
-#define LOGGING_H
+#pragma once
 #include "util.h"
 EXTERN_C_BEGIN
 /// @file logging.h
@@ -48,4 +47,3 @@ unsigned short enable_win_ansi();
 extern bool logging_enabled;
 
 EXTERN_C_END
-#endif // LOGGING_H

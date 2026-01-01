@@ -1,5 +1,4 @@
-#ifndef VFILE_H
-#define VFILE_H
+#pragma once
 #include "util.h"
 EXTERN_C_BEGIN
 /// @file vfile.h
@@ -107,4 +106,3 @@ u64 vfile_read_bytes(vfile* file, void* buf, u32 size);
 // The do-while loop forces you to use a semicolon when calling the macro
 
 EXTERN_C_END
-#endif // #ifndef VFILE_H

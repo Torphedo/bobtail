@@ -1,5 +1,4 @@
-#ifndef PLATFORM_H
-#define PLATFORM_H
+#pragma once
 #include "util.h"
 EXTERN_C_BEGIN
 /// @file platform.h
@@ -53,4 +52,3 @@ EXTERN_C_BEGIN
 #endif
 
 EXTERN_C_END
-#endif // #ifndef PLATFORM_H

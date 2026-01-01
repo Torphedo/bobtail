@@ -1,5 +1,4 @@
-#ifndef QUEUE_H
-#define QUEUE_H
+#pragma once
 #include "util.h"
 EXTERN_C_BEGIN
 /// @file queue.h
@@ -68,4 +67,3 @@ void queue_clear(queue* q);
 bool queue_empty(queue q);
 
 EXTERN_C_END
-#endif // #ifndef QUEUE_H

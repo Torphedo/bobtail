@@ -1,5 +1,4 @@
-#ifndef PATH_H
-#define PATH_H
+#pragma once
 #include "util.h"
 EXTERN_C_BEGIN
 /// @file path.h

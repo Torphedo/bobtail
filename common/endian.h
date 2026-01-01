@@ -1,5 +1,4 @@
-#ifndef ENDIAN_H
-#define ENDIAN_H
+#pragma once
 #include "util.h"
 EXTERN_C_BEGIN
 /// @file endian.h
@@ -62,4 +61,3 @@ do {                                  \
 } while(0)
 
 EXTERN_C_END
-#endif // ENDIAN_H

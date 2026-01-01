@@ -1,5 +1,4 @@
-#ifndef LIST_H
-#define LIST_H
+#pragma once
 #include "util.h"
 EXTERN_C_BEGIN
 /// @file list.h
@@ -112,4 +111,3 @@ bool list_contains(list l, const void* data);
 bool list_empty(list l);
 
 EXTERN_C_END
-#endif // #ifndef LIST_H

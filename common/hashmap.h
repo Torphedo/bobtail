@@ -1,5 +1,4 @@
-#ifndef HASHMAP_H
-#define HASHMAP_H
+#pragma once
 #include "util.h"
 EXTERN_C_BEGIN
 
@@ -105,4 +104,3 @@ do {                                           \
 #define HB_ADD_VAL(desc, key, val, T) HB_ADD_VAL_DIRECT(desc, crc32fast((const u8*)(key), strlen(key)), val, T)
 
 EXTERN_C_END
-#endif // #ifndef HASHMAP_H

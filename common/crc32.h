@@ -1,5 +1,4 @@
-#ifndef CRC32_H
-#define CRC32_H
+#pragma once
 #include "util.h"
 EXTERN_C_BEGIN
 
@@ -39,4 +38,3 @@ u32 software_crc32c(const u8* buf, u64 len);
 #define crc32fast crc32c
 
 EXTERN_C_END
-#endif // #ifndef CRC32_H

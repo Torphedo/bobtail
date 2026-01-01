@@ -1,5 +1,4 @@
-#ifndef SHA1_H
-#define SHA1_H
+#pragma once
 #include "util.h"
 EXTERN_C_BEGIN
 /// @file sha1.h
@@ -34,4 +33,3 @@ bool SHA1_blank(sha1_digest x);
 void SHA1_print(sha1_digest x);
 
 EXTERN_C_END
-#endif // SHA1_H

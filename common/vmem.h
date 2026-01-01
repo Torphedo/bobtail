@@ -1,5 +1,4 @@
-#ifndef VMEM_H
-#define VMEM_H
+#pragma once
 #include "util.h"
 EXTERN_C_BEGIN
 /// @file vmem.h
@@ -76,4 +75,3 @@ int vmem_commit(void* addr, u64 size);
 int vmem_free(void* addr, u64 size);
 
 EXTERN_C_END
-#endif // VMEM_H

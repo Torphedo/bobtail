@@ -1,5 +1,4 @@
-#ifndef IMAGE_H
-#define IMAGE_H
+#pragma once
 #include "util.h"
 EXTERN_C_BEGIN
 /// @file image.h
@@ -62,4 +61,3 @@ void img_write(texture img, const char* path);
 texture image_buf_load(const char* filename, u8* img_buf, u32 buf_size);
 
 EXTERN_C_END
-#endif // #ifndef IMAGE_H

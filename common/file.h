@@ -1,5 +1,4 @@
-#ifndef FILE_H
-#define FILE_H
+#pragma once
 #include "util.h"
 EXTERN_C_BEGIN
 /// @file file.h
@@ -50,4 +49,3 @@ static inline u32 magic(char a, char b, char c, char d) {
 bool file_has_magic(const char* path, u32 magic);
 
 EXTERN_C_END
-#endif // #ifndef FILE_H

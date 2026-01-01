@@ -1,5 +1,6 @@
-#ifndef SIMD_H_
-#define SIMD_H_
+#pragma once
+#include "util.h"
+EXTERN_C_BEGIN
 #include <stdbool.h>
 #include "int.h"
 
@@ -30,4 +31,4 @@ static bool sse4_available() {
     return (extended_features & bit_SSE4_2) != 0;
 }
 
-#endif // SIMD_H_
+EXTERN_C_END

@@ -1,5 +1,4 @@
-#ifndef UTF8_H
-#define UTF8_H
+#pragma once
 #include "util.h"
 EXTERN_C_BEGIN
 /// @file utf8.h
@@ -167,4 +166,3 @@ static u32 utf8_codepoint(const char* bytes, u8* length_out) {
 }
 
 EXTERN_C_END
-#endif // UTF8_H

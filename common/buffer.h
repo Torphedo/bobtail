@@ -1,5 +1,4 @@
-#ifndef BUFFER_H
-#define BUFFER_H
+#pragma once
 #include "util.h"
 EXTERN_C_BEGIN
 /// @file buffer.h
@@ -44,4 +43,3 @@ bool buf_empty(buffer_t buf);
 bool buf_resize(buffer_t* buf, u64 new_size, bool wipe_on_alloc);
 
 EXTERN_C_END
-#endif // #ifndef BUFFER_H
