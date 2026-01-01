@@ -1,8 +1,7 @@
 #ifndef INT_H
 #define INT_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file int.h
 
 #include <stdint.h>
@@ -61,25 +60,5 @@ float reflect(float val, float axis);
 /// Print a 16-bit string as if it were 8-bit (portable, unlike %ws)
 void print_c16s(const c16* str);
 
-/// Round a number up to any boundary
-#define ALIGN_UP(x, bound) ((x) + ((bound) - ((x) % (bound))))
-
-// sys/param.h defines these on some platforms, (included in platform.h)
-#ifndef MAX
-/// Return the larger of 2 values
-#define MAX(a, b) (((a) > (b)) ? (a) : (b))
-#endif
-#ifndef MIN
-/// Return the smaller of 2 values
-#define MIN(a, b) (((a) < (b)) ? (a) : (b))
-#endif
-/// Returns low or high bound if @p val is out of bounds, otherwise return @p val
-#define CLAMP(low, val, high) (((val) < (low)) ? (low) : MIN((val), (high)))
-
-/// Can only be used on arrays with compile-time known sizes
-#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(*(arr)))
-
-#ifdef __cplusplus
-}
-#endif
+EXTERN_C_END
 #endif // INT_H
