@@ -63,7 +63,7 @@ flags parse_arguments(int argc, char** argv, const char* args[], u32 args_count)
 /// @param option Long form of your option name
 /// @param shorthand Short form of your option name
 /// @return String value, or NULL if not found
-char* command_getoption(int argc, char** argv, const char* option, const char* shorthand);
+char* args_getoption(int argc, char** argv, const char* option, const char* shorthand);
 
 /// @brief Parse Linux-style boolean flags
 ///
@@ -74,7 +74,7 @@ char* command_getoption(int argc, char** argv, const char* option, const char* s
 /// @param option Long form of your option name
 /// @param shorthand Short form of your option name
 /// @return Whether the flag was present
-bool command_getflag(int argc, char** argv, const char* option, const char* shorthand);
+bool args_getflag(int argc, char** argv, const char* option, const char* shorthand);
 
 /// @brief Get the argument at a specific index from the back.
 ///
