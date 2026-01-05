@@ -1,4 +1,5 @@
 #include <string.h>
+#include <assert.h>
 
 #include "logging.h"
 #include "int.h"
@@ -48,4 +49,63 @@ flags parse_arguments(int argc, char** argv, const char* args[], u32 args_count)
     }
 
     return output;
+}
+
+char* args_getoption(int argc, char** argv, const char* option, const char* shorthand) {
+    // Make our pointers always non-NULL
+    option = (option) ? option : "";
+    shorthand = (shorthand) ? shorthand : "";
+
+    char* result = NULL;
+    bool hit = false;
+    for (u32 i = 0; i < argc; i++) {
+        char* arg = argv[i];
+        if (hit) {
+            // Last arg was the flag, this must be the value
+            result = arg;
+            break;
+        }
+
+        // Skip up to 2 dashes to handle long and short hand flags
+        for (u32 j = 0; j < 2; j++) {
+            if (*arg == '-') {
+                arg++;
+            }
+        }
+        hit = (strcmp(arg, option) == 0) || (strcmp(arg, shorthand) == 0);
+    }
+
+    return result;
+}
+
+bool args_getflag(int argc, char** argv, const char* option, const char* shorthand) {
+    // Make our pointers always non-NULL
+    option = (option) ? option : "";
+    shorthand = (shorthand) ? shorthand : "";
+
+    char* result = NULL;
+    for (u32 i = 0; i < argc; i++) {
+        char* arg = argv[i];
+
+        // Skip up to 2 dashes to handle long and short hand flags
+        for (u32 j = 0; j < 2; j++) {
+            if (*arg == '-') {
+                arg++;
+            }
+        }
+        bool hit = (strcmp(arg, option) == 0) || (strcmp(arg, shorthand) == 0);
+        if (hit) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+char* args_get_from_back(int argc, char** argv, unsigned int idx) {
+    const int i = MAX(0, argc - 1 - (int)idx);
+
+    assert(i >= 0);
+    assert(i < argc);
+    return argv[i];
 }
