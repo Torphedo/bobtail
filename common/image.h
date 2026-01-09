@@ -39,8 +39,7 @@ typedef struct {
     u8* data;
     u16 width; // u16 is plenty for any image
     u16 height;
-    /// Number of mipmaps
-    u16 mip_level;
+    bool use_mipmaps;
 
     bool compressed;
     img_fmt_compressed fmt;
@@ -49,6 +48,11 @@ typedef struct {
     u8 unit_size;
     /// @brief Number of uncompressed color channels
     u8 channels;
+
+    // Whether this is a cubemap, with a texture for each of the 6 directions
+    bool cubemap;
+    // Alignment of each of the 6 cubemap textures
+    u16 cubemap_alignment;
 } texture;
 
 /// Round image dimensions down to some value
