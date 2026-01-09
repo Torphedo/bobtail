@@ -4,6 +4,7 @@
 /// @brief Input state & polling callbacks
 
 #include <stdbool.h>
+#include "../util.h"
 
 #include <GLFW/glfw3.h>
 
