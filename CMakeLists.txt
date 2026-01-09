@@ -28,7 +28,6 @@ if (BOBTAIL_OPENGL)
 endif()
 
 add_library(bobtail STATIC
-    common/int.c
     common/file.c
     common/arguments.c
     common/logging.c
