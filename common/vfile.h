@@ -48,6 +48,20 @@ void* vfile_cur(vfile file);
 /// @return The number of bytes that were copied
 u64 vfile_read_bytes(vfile* file, void* buf, u32 size);
 
+/// @brief Write bytes from a buffer into the file
+/// @param file The file to write to
+/// @param buf Buffer to copy data from
+/// @param size The number of bytes to copy
+/// @return The number of bytes that were copied
+u64 vfile_write_bytes(vfile* file, const void* buf, u32 size);
+
+/// @brief Copy data between 2 files
+/// @param in The file to read from
+/// @param out The file to write to
+/// @param size The number of bytes to copy
+/// @return The number of bytes that were copied
+u64 vfile_transfer(vfile* in, vfile* out, u32 size);
+
 /// @brief Like @ref vfile_cur(), but advances [pos].
 ///
 /// For example:

@@ -33,3 +33,21 @@ u64 vfile_read_bytes(vfile* file, void* buf, u32 size) {
 
     return read_size;
 }
+
+u64 vfile_write_bytes(vfile* file, const void* buf, u32 size) {
+    const s64 size_remaining = MAX(0, (s64)file->size - (s64)file->pos);
+    const u64 write_size = MIN(size, size_remaining);
+    memcpy(vfile_cur(*file), buf, write_size);
+    vfile_seek(file, write_size);
+
+    return write_size;
+}
+
+u64 vfile_transfer(vfile* in, vfile* out, u32 size) {
+    const s64 remaining_out = MAX(0, (s64)out->size - (s64)out->pos);
+    const u32 transfer_size = MIN(remaining_out, size);
+
+    vfile_read_bytes(in, vfile_cur(*out), transfer_size);
+    vfile_seek(out, transfer_size);
+    return transfer_size;
+}
