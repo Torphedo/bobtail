@@ -10,7 +10,7 @@ EXTERN_C_BEGIN
 // https://learn.microsoft.com/en-us/windows/win32/direct3ddds/dds-header
 
 
-typedef enum dds_flags {
+typedef enum {
     DDSD_CAPS        = 1 << 0,
     DDSD_HEIGHT      = 1 << 1,
     DDSD_WIDTH       = 1 << 2,
@@ -23,7 +23,7 @@ typedef enum dds_flags {
     REQUIRED_BASE_FLAGS = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT
 }dds_flags;
 
-typedef enum dds_caps_flags {
+typedef enum {
     DDSCAPS_COMPLEX = 0x00000008,
     DDSCAPS_MIPMAP  = 0x00400000,
     DDSCAPS_TEXTURE = 0x00001000
@@ -31,7 +31,7 @@ typedef enum dds_caps_flags {
 
 // See dwFlags table on MSDN:
 // https://learn.microsoft.com/en-us/windows/win32/direct3ddds/dds-pixelformat
-typedef enum dds_format_flags {
+typedef enum {
     DDPF_ALPHAPIXELS = 0x00000001,
     DDPF_ALPHA       = 0x00000002,
     DDPF_FOURCC      = 0x00000004,
@@ -72,6 +72,10 @@ typedef enum {
     DXGI_FORMAT_BC2_UNORM_SRGB = 75,
     DXGI_FORMAT_BC3_UNORM_SRGB = 78,
     DXGI_FORMAT_BC4_UNORM = 79,
+    DXGI_FORMAT_B5G6R5_UNORM = 85,
+    DXGI_FORMAT_B5G5R5A1_UNORM = 86,
+    DXGI_FORMAT_B4G4R4A4_UNORM = 115,
+
 }dxgi_formats;
 
 typedef struct dds_pixel_format {

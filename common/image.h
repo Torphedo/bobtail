@@ -18,8 +18,15 @@ typedef enum {
     /// Greyscale at 4 bits per pixel (8 bytes per 4x4 block)
     BC4,
 
+    /// These aren't really compressed, but the channels are less than 1 byte
+    /// each and GIMP won't load handcrafted files with the correct channel masks.
+    DDS_FORMAT_BGR_565, // 5 bits for blue/red, 6 bits for green
+    DDS_FORMAT_BGRA_5551, // 5 bits per channel, 1 bit alpha
+    DDS_FORMAT_BGRA_4444, // 4 bits per channel
+
     /// This is considered compressed
     DDS_FORMAT_FLOAT,
+
     /// Not a real enum value. Increment then modulo by this to cycle through formats
     DXT_ENUM_MAX,
 } img_fmt_compressed;

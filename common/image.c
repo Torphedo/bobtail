@@ -46,7 +46,7 @@ bool has_flag(u32 input, u32 flag) {
 // texture at mip level 0.
 u32 dxt_pitch(u32 height, u32 width, u32 block_size) {
     const u32 block_res = 16; // 16 pixels per block
-    const u32 pixels_per_byte = block_res / block_size;
+    const float pixels_per_byte = (float)block_res / block_size;
     const u32 pitch = (width * height) / pixels_per_byte;
     return pitch;
 }
@@ -74,18 +74,24 @@ u64 pixel_count_max_mips(u32 width, u32 height, bool compressed) {
 
 void img_write(texture img, const char* path) {
     float bytes_per_pixel = 0.0f;
+    bool needs_extended_header = img.cubemap;
 
     dds_header header = mk_header(img.height, img.width, img.use_mipmaps);
     if (img.compressed) {
         // Compressed texture
-        header.flags |= DDSD_LINEARSIZE;
         u8 block_size = DXT1_BLOCK_SIZE;
 
         // Maybe we could make this a lookup table...
         switch (img.fmt) {
             default:
-                LOG_MSG(warning, "Unknown compressed texture format %d, assuming DXT1.\n", img.fmt);
-                // fallthrough
+                LOG_MSG(error, "Unknown compressed texture format %d\n", img.fmt);
+                break;
+            case DDS_FORMAT_BGR_565:
+            case DDS_FORMAT_BGRA_5551:
+            case DDS_FORMAT_BGRA_4444:
+                needs_extended_header = true;
+                bytes_per_pixel = 2;
+                break;
             case DXT1:
                 header.pixel_format.format_char_code = DDS_DXT1;
                 block_size = DXT1_BLOCK_SIZE;
@@ -104,10 +110,19 @@ void img_write(texture img, const char* path) {
                 break;
         }
 
-        header.pitch_or_linear_size = dxt_pitch(img.height, img.width, block_size);
-        header.pixel_format.flags = DDPF_FOURCC;
+        // Handle block compressed formats
+        switch (img.fmt) {
+        case DXT1:
+        case DXT3:
+        case BC4:
+        case DXT5:
+            header.flags |= DDSD_LINEARSIZE;
+            header.pitch_or_linear_size = dxt_pitch(img.height, img.width, block_size);
+            header.pixel_format.flags = DDPF_FOURCC;
+            bytes_per_pixel = block_size / 16.0f; // 16 pixels per block
+            break;
+        }
 
-        bytes_per_pixel = block_size / 16.0f; // 16 pixels per block
     } else {
         // Uncompressed texture
         const u32 bits_per_channel = 8 * img.unit_size;
@@ -167,9 +182,11 @@ void img_write(texture img, const char* path) {
 
     const u32 tex_size = (u32)(bytes_per_pixel * pixel_count_max_mips(img.width, img.height, img.compressed));
 
-    if (img.cubemap) {
+    if (needs_extended_header) {
         header.pixel_format.format_char_code = DDS_DX10;
         header.pixel_format.flags |= DDPF_FOURCC;
+    }
+    if (img.cubemap) {
         header.caps2 = DDS_CUBEMAP_ALL_FACES;
     }
 
@@ -180,13 +197,15 @@ void img_write(texture img, const char* path) {
     fwrite(&header, sizeof(header), 1, out);
 
     // Write special DX10 header for cubemaps if needed.
-    if (img.cubemap) {
+    if (needs_extended_header) {
         dx10_extended_format dx10_header = {
             .resource_dimension = DIMENSION_2D,
-            .misc_flags = FLAG_2D_TEXTURECUBE,
-            .array_size = 1,
-            .misc_flags2 = 0
         };
+
+        if (img.cubemap) {
+            dx10_header.misc_flags = FLAG_2D_TEXTURECUBE;
+            dx10_header.array_size = 1;
+        }
 
         // Write appropriate texture format
         switch (img.fmt) {
@@ -201,6 +220,15 @@ void img_write(texture img, const char* path) {
             break;
         case BC4:
             dx10_header.dxgi_format = DXGI_FORMAT_BC4_UNORM;
+            break;
+        case DDS_FORMAT_BGRA_4444:
+            dx10_header.dxgi_format = DXGI_FORMAT_B4G4R4A4_UNORM;
+            break;
+        case DDS_FORMAT_BGRA_5551:
+            dx10_header.dxgi_format = DXGI_FORMAT_B5G5R5A1_UNORM;
+            break;
+        case DDS_FORMAT_BGR_565:
+            dx10_header.dxgi_format = DXGI_FORMAT_B5G6R5_UNORM;
             break;
         default:
             LOG_MSG(warning, "Unknown cubemap texture format %d\n", img.fmt);
