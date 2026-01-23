@@ -304,7 +304,7 @@ texture image_buf_load(const char* filename, u8* img_buf, u32 buf_size) {
     fread(&header, sizeof(header), 1, f);
 
     // Read in remaining image data from the DDS
-    fread(img.data, size - sizeof(header), 1, f);
+    fread(img.data, MIN(buf_size, size - sizeof(header)), 1, f);
     fclose(f);
 
     // Use data from the DDS as our initial texture state
