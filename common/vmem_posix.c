@@ -4,11 +4,15 @@
 
 #ifdef PLATFORM_POSIX
 #include <stdlib.h> // For NULL
+#include <stdio.h>
 #include "int.h"
 #include "vmem.h"
+#include "file.h"
+#include "logging.h"
+
 #include <sys/mman.h>
 #include <fcntl.h>
-#include <stdio.h>
+#include <errno.h>
 
 void* vmem_create_repeat_mapping(u32 ring_width, u32 repeat_count) {
     // To trick mmap() into mapping the same region to consecutive virtual
@@ -78,6 +82,28 @@ int vmem_commit(void* addr, u64 size) {
 
 int vmem_free(void* addr, u64 size) {
     return munmap(addr, size);
+}
+
+void* vmem_map_file(const char* file) {
+    const long page_size = sysconf(_SC_PAGE_SIZE);
+    const s64 size = ALIGN_UP(file_size(file), page_size);
+    const int prot = PROT_READ | PROT_WRITE;
+    const int flags = MAP_PRIVATE;
+
+    const int fd = open(file, O_RDONLY);
+    if (fd == -1) {
+        return NULL;
+    }
+
+    void* result = mmap(NULL, size, prot, flags, fd, 0);
+    if (result == MAP_FAILED) {
+        LOG_MSG(error, "Failed to map file '%s' because '%s'\n", file, strerror(errno));
+        return NULL;
+    }
+}
+
+void vmem_unmap_file(void* addr, u64 size) {
+    munmap(addr, size);
 }
 #endif
 

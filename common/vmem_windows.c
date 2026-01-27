@@ -3,9 +3,10 @@
 #include "platform.h"
 
 #ifdef PLATFORM_WINDOWS
-#include <Windows.h>
+#include <windows.h>
 #include <stdlib.h> // For NULL
 #include "int.h"
+#include "file.h"
 #include "vmem.h"
 
 // Non-thread-safe version that may have to be retried a few times if a race
@@ -98,4 +99,39 @@ int vmem_free(void* addr, u64 size) {
     }
     return -1;
 }
+
+void* vmem_map_file(const char* file) {
+    return file_load(file);
+
+    const DWORD access = GENERIC_READ;
+    const DWORD share = FILE_SHARE_READ | FILE_SHARE_DELETE | FILE_SHARE_WRITE;
+    HANDLE h = CreateFileA(file, access, share, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if (h == INVALID_HANDLE_VALUE) {
+        return NULL;
+    }
+
+    HANDLE mapping = CreateFileMapping(h, NULL, PAGE_WRITECOPY, 0, 0, NULL);
+    if (mapping == NULL) {
+        CloseHandle(h);
+        return NULL;
+    }
+
+    // Map the entire file into memory
+    // Return value is NULL on failure, which matches our API
+    void* buf = MapViewOfFile(mapping, FILE_MAP_COPY, 0, 0, 0);
+
+    // Close the mapping. On Windows' side, our mapped view maintains an
+    // internal reference to the mapping, so it's automatically destroyed once
+    // we unmap our view (and there are no longer any references to it).
+    CloseHandle(mapping);
+    CloseHandle(h);
+
+    return buf;
+}
+
+void vmem_unmap_file(void* addr, u64 size) {
+    UnmapViewOfFile(addr);
+}
+
 #endif
