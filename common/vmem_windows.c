@@ -101,8 +101,6 @@ int vmem_free(void* addr, u64 size) {
 }
 
 void* vmem_map_file(const char* file) {
-    return file_load(file);
-
     const DWORD access = GENERIC_READ;
     const DWORD share = FILE_SHARE_READ | FILE_SHARE_DELETE | FILE_SHARE_WRITE;
     HANDLE h = CreateFileA(file, access, share, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -111,7 +109,8 @@ void* vmem_map_file(const char* file) {
         return NULL;
     }
 
-    HANDLE mapping = CreateFileMapping(h, NULL, PAGE_WRITECOPY, 0, 0, NULL);
+    const DWORD prot = PAGE_WRITECOPY | SEC_RESERVE;
+    HANDLE mapping = CreateFileMapping(h, NULL, prot, 0, 0, NULL);
     if (mapping == NULL) {
         CloseHandle(h);
         return NULL;
