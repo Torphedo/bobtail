@@ -1,5 +1,8 @@
 #ifndef SHADER_H
 #define SHADER_H
+#include "../util.h"
+EXTERN_C_BEGIN
+
 #include <stdbool.h>
 /// @file shader.h
 /// @brief Utility functions to quickly compile shaders
@@ -46,4 +49,5 @@ gl_obj program_compile_geo(const char* vert_src, const char* frag_src, const cha
 /// @return shader program id for OpenGL, or 0 on failure
 gl_obj program_compile_src(const char* vert_src, const char* frag_src);
 
+EXTERN_C_END
 #endif // #ifndef SHADER_H

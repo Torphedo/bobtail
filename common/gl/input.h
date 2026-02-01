@@ -1,10 +1,12 @@
 #ifndef INPUT_H
 #define INPUT_H
+#include "../util.h"
+EXTERN_C_BEGIN
+
 /// @file input.h
 /// @brief Input state & polling callbacks
 
 #include <stdbool.h>
-#include "../util.h"
 
 #include <GLFW/glfw3.h>
 
@@ -216,4 +218,5 @@ void update_mods(GLFWwindow* window);
 /// Collect gamepad state from up to 16 connected controllers
 void gamepad_update();
 
+EXTERN_C_END
 #endif // INPUT_H
