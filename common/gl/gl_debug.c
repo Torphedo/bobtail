@@ -86,6 +86,14 @@ void APIENTRY gl_debug_msg(GLenum source, GLenum type, unsigned int id, GLenum s
         severity_str = "DEBUG";
         break;
     }
+
+    // Disable very chatty suggestions from drivers except in debug mode
+#ifndef NDEBUG
+    if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) {
+        return;
+    }
+#endif
+
     printf("OpenGL %s message [%s] [%s] ", source_str, severity_str, type_str);
     printf("[id %d]: %s\n", id, message);
 }
@@ -116,4 +124,3 @@ void gl_debug_setup() {
         }
     }
 }
-
