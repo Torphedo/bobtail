@@ -9,7 +9,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 if (MSVC)
     # Silence warnings about "unsafe" functions like fopen()
     add_compile_definitions(_CRT_SECURE_NO_DEPRECATE)
-else()
+elseif(NOT ANDROID)
     # For CRC32C SSE intrinsics
     add_compile_options(-mcrc32)
 endif()
