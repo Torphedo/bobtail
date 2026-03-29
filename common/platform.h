@@ -20,6 +20,10 @@ EXTERN_C_BEGIN
     #define PLATFORM_APPLE 1
 #endif
 
+#ifdef __ANDROID__
+    #define PLATFORM_ANDROID 1
+#endif
+
 #if defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
     #define PLATFORM_UNIX 1
 

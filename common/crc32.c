@@ -1,9 +1,8 @@
 #include "crc32.h"
-#include "common/simd.h"
+#include "simd.h"
 #include "endian.h"
 #include "logging.h"
 #include <assert.h>
-#include <immintrin.h>
 
 /* Copyright (C) 1986 Gary S. Brown.  You may use this program, or
    code or tables extracted from it, as desired without restriction.*/

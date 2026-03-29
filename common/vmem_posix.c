@@ -2,7 +2,7 @@
 
 #include "platform.h"
 
-#ifdef PLATFORM_POSIX
+#if defined(PLATFORM_POSIX)
 #include <stdlib.h> // For NULL
 #include <stdio.h>
 #include "int.h"
@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#ifndef PLATFORM_ANDROID
 void* vmem_create_repeat_mapping(u32 ring_width, u32 repeat_count) {
     // To trick mmap() into mapping the same region to consecutive virtual
     // regions, we create a virtual (in-memory) file as a backing buffer.
@@ -55,6 +56,7 @@ void vmem_destroy_repeat_mapping(void* base_addr, u32 ring_width, u32 repeat_cou
     u64 size = ring_width * VMEM_ALLOC_GRANULARITY * repeat_count;
     munmap(base_addr, size);
 }
+#endif
 
 void* vmem_reserve(u64 size) {
     // MAP_ANONYMOUS tells it not to try to map a file into memory
@@ -100,6 +102,8 @@ void* vmem_map_file(const char* file) {
         LOG_MSG(error, "Failed to map file '%s' because '%s'\n", file, strerror(errno));
         return NULL;
     }
+
+    return result;
 }
 
 void vmem_unmap_file(void* addr, u64 size) {
