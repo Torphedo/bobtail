@@ -344,7 +344,8 @@ texture image_buf_load(const char* filename, u8* img_buf, u32 buf_size) {
             LOG_MSG(info, "I'm loading the image anyway, as if it had %d channels.\n", img.channels);
         }
 
-        img.unit_size = header.pixel_format.bits_per_pixel / 8;
+        const u32 bytes_per_pixel = header.pixel_format.bits_per_pixel / 8;
+        img.unit_size = bytes_per_pixel / img.channels;
     }
      
     return img;
