@@ -1,8 +1,6 @@
-#ifndef SHA1_H
-#define SHA1_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#pragma once
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file sha1.h
 /// @brief SHA-1 hashing implementation
 ///
@@ -34,7 +32,4 @@ bool SHA1_blank(sha1_digest x);
 /// Print a SHA-1 digest in uppercase hexidecimal format (no newline)
 void SHA1_print(sha1_digest x);
 
-#ifdef __cplusplus
-}
-#endif
-#endif // SHA1_H
+EXTERN_C_END

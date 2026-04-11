@@ -1,8 +1,6 @@
-#ifndef PLATFORM_H
-#define PLATFORM_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#pragma once
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file platform.h
 /// @brief Simple definitions to find out the target platform
 ///
@@ -20,6 +18,10 @@ extern "C" {
 
 #if (defined(__APPLE__) && defined(__MACH__))
     #define PLATFORM_APPLE 1
+#endif
+
+#ifdef __ANDROID__
+    #define PLATFORM_ANDROID 1
 #endif
 
 #if defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
@@ -53,7 +55,4 @@ extern "C" {
     #define PLATFORM_DIRSEP ('/')
 #endif
 
-#ifdef __cplusplus
-}
-#endif
-#endif // #ifndef PLATFORM_H
+EXTERN_C_END

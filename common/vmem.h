@@ -1,8 +1,6 @@
-#ifndef VMEM_H
-#define VMEM_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#pragma once
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file vmem.h
 /// @brief Cross-platform virtual memory utilities
 /// @author Greenlord/S41L0R (Nintendo Switch implementation)
@@ -114,7 +112,14 @@ int vmem_commit(void* addr, u64 size);
 /// @return 0 on success, -1 on failure.
 int vmem_free(void* addr, u64 size);
 
-#ifdef __cplusplus
-}
-#endif
-#endif // VMEM_H
+/// @brief Map a file into virtual memory without reading the entire thing
+/// @param file File path
+/// @return Pointer to mapped buffer
+void* vmem_map_file(const char* file);
+
+/// @brief Free an existing file mapping
+/// @param addr Mapped buffer to free
+/// @param size Size of the mapped buffer
+void vmem_unmap_file(void* addr, u64 size);
+
+EXTERN_C_END

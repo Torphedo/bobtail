@@ -1,14 +1,13 @@
-#ifndef VFILE_H
-#define VFILE_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#pragma once
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file vfile.h
 /// @brief A stdio-style interface that can treat memory like a file stream
 
 #include <stdbool.h>
 
 #include "int.h"
+#include "logging.h"
 
 /// Virtual file context/state (like stdio FILE*)
 typedef struct {
@@ -42,9 +41,43 @@ void vfile_seek(vfile* file, u32 size);
 /// This basically just hides some pointer casts.
 void* vfile_cur(vfile file);
 
+/// @brief Read bytes into a buffer
+/// @param file The file to read from
+/// @param buf Buffer to copy data into
+/// @param size The number of bytes to copy
+/// @return The number of bytes that were copied
+u64 vfile_read_bytes(vfile* file, void* buf, u32 size);
+
+/// @brief Write bytes from a buffer into the file
+/// @param file The file to write to
+/// @param buf Buffer to copy data from
+/// @param size The number of bytes to copy
+/// @return The number of bytes that were copied
+u64 vfile_write_bytes(vfile* file, const void* buf, u32 size);
+
+/// @brief Copy data between 2 files
+/// @param in The file to read from
+/// @param out The file to write to
+/// @param size The number of bytes to copy
+/// @return The number of bytes that were copied
+u64 vfile_transfer(vfile* in, vfile* out, u32 size);
+
+/// @brief Like @ref vfile_cur(), but advances [pos].
+///
+/// For example:
+/// @code
+/// vfile f = ...;
+/// const u32 data = VFILE_READ(u32, f);
+/// @endcode
+///
+/// @param T The data type to read
+/// @param file a @ref vfile structure to read from
+/// @return equivalent value to (T*)vfile_cur(file)
+/// type @p T.
+#define VFILE_READ_PTR(T, file) ((T*)(&(file)->ptr[((file)->pos += sizeof(T)) - sizeof(T)]))
+
 /// @brief Read data from a virtual file.
 ///
-/// Any type that can be pointer-dereferenced works (should support structs)
 /// For example:
 /// @code
 /// vfile f = ...;
@@ -56,7 +89,7 @@ void* vfile_cur(vfile file);
 /// @return The requested data is returned as if this was a function of return
 /// type @p T.
 // TODO: Use MIN() here to avoid reading out of bounds
-#define VFILE_READ(T, file) (*(T*)(&(file)->ptr[((file)->pos += sizeof(T)) - sizeof(T)]))
+#define VFILE_READ(T, file) (*VFILE_READ_PTR(T, file))
 
 /// @brief Write data to a virtual file.
 ///
@@ -76,15 +109,14 @@ void* vfile_cur(vfile file);
 #define VFILE_WRITE(T, file, val)                         \
     do {                                                  \
         if (vfile_opcheck(file, sizeof(T))) {             \
-            *((T)*)(&(file)->ptr[(file)->pos]) = (val);   \
+            *(T*)(&(file)->ptr[(file)->pos]) = (val);     \
             const u32 _newpos = (file)->pos + sizeof(T);  \
             (file)->pos = MIN(_newpos, (file)->size - 1); \
+        } else {                                          \
+            LOG_MSG(warning, "write @ 0x%x / 0x%x would be out of bounds [%d bytes]\n", (file)->pos, (file)->size, sizeof(T)); \
         }                                                 \
     } while (0)
 // The MIN() keeps us from advancing past EOF
 // The do-while loop forces you to use a semicolon when calling the macro
 
-#ifdef __cplusplus
-}
-#endif
-#endif // #ifndef VFILE_H
+EXTERN_C_END

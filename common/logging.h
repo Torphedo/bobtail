@@ -1,8 +1,6 @@
-#ifndef LOGGING_H
-#define LOGGING_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#pragma once
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file logging.h
 /// A logging wrapper allowing color coding, automatic insertion of the current
 /// function name, and the ability to silence all output.
@@ -48,7 +46,4 @@ unsigned short enable_win_ansi();
 /// Global variable used to toggle all logging
 extern bool logging_enabled;
 
-#ifdef __cplusplus
-}
-#endif
-#endif // LOGGING_H
+EXTERN_C_END

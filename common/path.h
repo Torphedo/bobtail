@@ -1,8 +1,6 @@
-#ifndef PATH_H
-#define PATH_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#pragma once
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file path.h
 /// @brief Utilities for working with filepaths
 
@@ -16,6 +14,14 @@ extern "C" {
 /// The extension actually doesn't need to be a normal extension (with a ".").
 /// All it actually does is check that the end of @p path matches @p extension.
 bool path_has_extension(const char* path, const char* extension);
+
+/// @brief Get the file extension from a path
+/// @param path The input filepath
+///
+/// @return The last '.' in the path (outer extension), or an empty string if
+/// there was no extension. The returned pointer is to the middle of the given
+/// string, so its lifetime is tied to your string's lifetime.
+const char* path_get_extension(const char* path);
 
 /// @brief Replace all backslashes in a string with forward slashes.
 /// @param path String to edit.
@@ -32,7 +38,13 @@ void path_fix_forward_slashes(char* path);
 /// with null characters.
 /// @param pos The position to start searching for directory separators. This
 /// should usually be the string's length + 1.
-void path_truncate(char* path, u16 pos);
+void path_truncate(char* path, u64 pos);
+
+/// @brief Truncate a filename or folder name from a path, leaving a trailing
+/// "\\" or "/". This variant creates a new string instead of modifying the input.
+/// @param path The path to truncate. If the string does not contain any slashes
+/// or backslashes, it will be completely filled with null characters.
+const char* path_truncate_clone(const char* path);
 
 /// Check if a path has any forward or backslashes
 bool path_has_slashes(const char* path);
@@ -52,7 +64,4 @@ void path_get_filename(const char* path, char* output);
 /// string.
 char* get_self_path(const char* argv_0);
 
-#ifdef __cplusplus
-}
-#endif
-#endif // #ifndef PATH_H
+EXTERN_C_END

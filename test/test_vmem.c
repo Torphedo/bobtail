@@ -45,14 +45,14 @@ bool test_vmem_reserve_commit() {
     const u64 region_size = exponent(2, 35);
     u8* region = vmem_reserve(region_size);
     if (region == NULL) {
-        printf("Failed to reserve %luGiB region!\n", region_size / exponent(1024, 3));
+        printf("Failed to reserve %lluGiB region!\n", region_size / exponent(1024, 3));
         result = false;
     }
 
     // This causes reservations in the pagefile, so we can't go too crazy with
     // committing.
     if (vmem_commit(region, VMEM_PAGE_SIZE * 5000) == -1) {
-        printf("Failed to commit %luGiB region!\n", region_size / exponent(1024, 3));
+        printf("Failed to commit %lluGiB region!\n", region_size / exponent(1024, 3));
         result = false;
     }
 
@@ -67,10 +67,10 @@ bool test_vmem_reserve_commit() {
         region[10000000] = 20;
         region[20000000] = 20;
 
-        // If a segfault happens here, the platform probably requires us to
-        // commit before writing.
         for (u8 i = 0; i < 35; i++) {
-            region[exponent(2, i)] = 50;
+            u8* addr = &region[exponent(2, i)];
+            vmem_commit(addr, VMEM_PAGE_SIZE);
+            *addr = 50;
         }
         vmem_free(region, region_size);
     }

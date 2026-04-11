@@ -3,9 +3,10 @@
 #include "platform.h"
 
 #ifdef PLATFORM_WINDOWS
-#include <Windows.h>
+#include <windows.h>
 #include <stdlib.h> // For NULL
 #include "int.h"
+#include "file.h"
 #include "vmem.h"
 
 // Non-thread-safe version that may have to be retried a few times if a race
@@ -17,7 +18,7 @@ void* repeat_mapping_fallback(u32 ring_width, u32 repeat_count) {
     const u64 ring_size = ring_width * VMEM_ALLOC_GRANULARITY;
     const u64 mapping_size = ring_size * repeat_count;
     // Create initial file mapping, backed only by the page file
-    HANDLE file_mapping = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, mapping_size << 32, mapping_size & UINT32_MAX, NULL);
+    HANDLE file_mapping = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, mapping_size >> 32, mapping_size & UINT32_MAX, NULL);
     if (file_mapping == INVALID_HANDLE_VALUE) {
         return NULL;
     }
@@ -98,4 +99,38 @@ int vmem_free(void* addr, u64 size) {
     }
     return -1;
 }
+
+void* vmem_map_file(const char* file) {
+    const DWORD access = GENERIC_READ;
+    const DWORD share = FILE_SHARE_READ | FILE_SHARE_DELETE | FILE_SHARE_WRITE;
+    HANDLE h = CreateFileA(file, access, share, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if (h == INVALID_HANDLE_VALUE) {
+        return NULL;
+    }
+
+    const DWORD prot = PAGE_WRITECOPY | SEC_RESERVE;
+    HANDLE mapping = CreateFileMapping(h, NULL, prot, 0, 0, NULL);
+    if (mapping == NULL) {
+        CloseHandle(h);
+        return NULL;
+    }
+
+    // Map the entire file into memory
+    // Return value is NULL on failure, which matches our API
+    void* buf = MapViewOfFile(mapping, FILE_MAP_COPY, 0, 0, 0);
+
+    // Close the mapping. On Windows' side, our mapped view maintains an
+    // internal reference to the mapping, so it's automatically destroyed once
+    // we unmap our view (and there are no longer any references to it).
+    CloseHandle(mapping);
+    CloseHandle(h);
+
+    return buf;
+}
+
+void vmem_unmap_file(void* addr, u64 size) {
+    UnmapViewOfFile(addr);
+}
+
 #endif

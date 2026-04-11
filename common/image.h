@@ -1,8 +1,6 @@
-#ifndef IMAGE_H
-#define IMAGE_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#pragma once
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file image.h
 /// @brief Utilities for handling raw and formatted image data
 
@@ -19,6 +17,16 @@ typedef enum {
     DXT5,
     /// Greyscale at 4 bits per pixel (8 bytes per 4x4 block)
     BC4,
+
+    /// These aren't really compressed, but the channels are less than 1 byte
+    /// each and GIMP won't load handcrafted files with the correct channel masks.
+    DDS_FORMAT_BGR_565, // 5 bits for blue/red, 6 bits for green
+    DDS_FORMAT_BGRA_5551, // 5 bits per channel, 1 bit alpha
+    DDS_FORMAT_BGRA_4444, // 4 bits per channel
+
+    /// This is considered compressed
+    DDS_FORMAT_FLOAT,
+
     /// Not a real enum value. Increment then modulo by this to cycle through formats
     DXT_ENUM_MAX,
 } img_fmt_compressed;
@@ -38,18 +46,20 @@ typedef struct {
     u8* data;
     u16 width; // u16 is plenty for any image
     u16 height;
-    /// Number of mipmaps
-    u16 mip_level;
+    bool use_mipmaps;
 
     bool compressed;
     img_fmt_compressed fmt;
 
-    /// @brief The size of each channel (Only used if uncompressed, see detailed description)
-    ///
-    /// 0 = u8, 1 = u16, 2 = u32
+    /// @brief The number of bytes per channel (Only used if uncompressed, see detailed description)
     u8 unit_size;
     /// @brief Number of uncompressed color channels
     u8 channels;
+
+    // Whether this is a cubemap, with a texture for each of the 6 directions
+    bool cubemap;
+    // Alignment of each of the 6 cubemap textures
+    u16 cubemap_alignment;
 } texture;
 
 /// Round image dimensions down to some value
@@ -61,7 +71,4 @@ void img_write(texture img, const char* path);
 /// Load a DDS from disk
 texture image_buf_load(const char* filename, u8* img_buf, u32 buf_size);
 
-#ifdef __cplusplus
-}
-#endif
-#endif // #ifndef IMAGE_H
+EXTERN_C_END

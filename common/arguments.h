@@ -1,7 +1,6 @@
 #pragma once
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file arguments.h
 /// Very basic argument parsing, mostly to extract input and output filepaths.
 
@@ -51,6 +50,39 @@ typedef struct {
 /// @return Returns a @ref flags structure
 flags parse_arguments(int argc, char** argv, const char* args[], u32 args_count);
 
-#ifdef __cplusplus
-}
-#endif
+/// @brief Parse Linux-style options with values
+///
+/// For example, if you want to specify a filepath, you might have an option
+/// named "--path", with "-p" as a shorthand. This function will handle:
+///   --path /path/to/file
+///   --path "/path/to/file"
+///   -p /path/to/file
+///   -p "/path/to/file"
+/// @param argc Your argc
+/// @param argv Your argv
+/// @param option Long form of your option name
+/// @param shorthand Short form of your option name
+/// @return String value, or NULL if not found
+char* args_getoption(int argc, char** argv, const char* option, const char* shorthand);
+
+/// @brief Parse Linux-style boolean flags
+///
+/// For example, you might have an option named "--skip", with "-s" as a
+/// shorthand. This function will succeed if it finds either.
+/// @param argc Your argc
+/// @param argv Your argv
+/// @param option Long form of your option name
+/// @param shorthand Short form of your option name
+/// @return Whether the flag was present
+bool args_getflag(int argc, char** argv, const char* option, const char* shorthand);
+
+/// @brief Get the argument at a specific index from the back.
+///
+/// e.g. idx 0 is the last argument, idx 1 is the second to last, etc.
+/// @param argc Your argc
+/// @param argv Your argv
+/// @param idx The number of indices from the back
+/// @return Argument text
+char* args_get_from_back(int argc, char** argv, unsigned int idx);
+
+EXTERN_C_END

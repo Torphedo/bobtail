@@ -1,8 +1,6 @@
-#ifndef LIST_H
-#define LIST_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#pragma once
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file list.h
 /// @brief Automatically expanding dynamic list
 /// @warning Don't keep pointers / indices to elements of the list for any
@@ -13,7 +11,7 @@ extern "C" {
 
 #include <stddef.h>
 #include <stdbool.h>
-#include "int.h"
+#include "buffer.h"
 
 /// @brief An automatically expanding dynamic list
 /// @warning Don't keep pointers / indices to elements of the list for any
@@ -22,13 +20,8 @@ extern "C" {
 /// to the list can and will modify any part of it.
 /// @sa queue
 typedef struct {
-    /// @brief Backing buffer
-    ///
-    /// We use a uintptr_t so we can have a typeless pointer that can't
-    /// accidentally be dereferenced.
-    uintptr_t data;
-    /// Current buffer size
-    u32 alloc_size;
+    buffer_t buf;
+
     /// @brief Index of the next open slot in the array (not the last element!)
     ///
     /// @warning This isn't the index of the last element! It could be an
@@ -56,6 +49,10 @@ list list_create(u32 init_size, u32 element_size);
 /// @param l List to destroy
 /// @sa list_create
 void list_destroy(list* l);
+
+/// @brief Find out how many elements the list has
+/// @param l List to query
+u32 list_size(list l);
 
 /// @brief Append an element to the list.
 /// @param l The list to modify
@@ -101,7 +98,7 @@ void list_merge(list* dest, list src);
 /// @param l List to search
 /// @param data Data to search for. Must be at least @ref list.element_size.
 /// @return Index of the data, or -1 on failure.
-s64 list_find(list l, const void* data);
+s32 list_find(list l, const void* data);
 
 /// @brief Whether the list contains a certain value.
 /// @param l List to search
@@ -113,7 +110,4 @@ bool list_contains(list l, const void* data);
 /// @brief Whether the list is empty
 bool list_empty(list l);
 
-#ifdef __cplusplus
-}
-#endif
-#endif // #ifndef LIST_H
+EXTERN_C_END

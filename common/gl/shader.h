@@ -1,5 +1,8 @@
 #ifndef SHADER_H
 #define SHADER_H
+#include "../util.h"
+EXTERN_C_BEGIN
+
 #include <stdbool.h>
 /// @file shader.h
 /// @brief Utility functions to quickly compile shaders
@@ -28,6 +31,17 @@ gl_obj shader_compile_src(const char* src, GLenum shader_type);
 
 /// @brief A wrapper to compile & link a whole shader program at once.
 ///
+/// This version allows for geometry shaders.
+/// You should call shader_link_check() afterwards in case of failure.
+/// @note This creates OpenGL resources that need to be freed later.
+/// @param vert_src GLSL source code for the vertex shader
+/// @param frag_src GLSL source code for the fragment shader
+/// @param geo_src  GLSL source code for the geometry shader
+/// @return shader program id for OpenGL, or 0 on failure
+gl_obj program_compile_geo(const char* vert_src, const char* frag_src, const char* geo_src);
+
+/// @brief A wrapper to compile & link a whole shader program at once.
+///
 /// You should call shader_link_check() afterwards in case of failure.
 /// @note This creates OpenGL resources that need to be freed later.
 /// @param vert_src GLSL source code for the vertex shader
@@ -35,4 +49,5 @@ gl_obj shader_compile_src(const char* src, GLenum shader_type);
 /// @return shader program id for OpenGL, or 0 on failure
 gl_obj program_compile_src(const char* vert_src, const char* frag_src);
 
+EXTERN_C_END
 #endif // #ifndef SHADER_H

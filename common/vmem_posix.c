@@ -2,16 +2,20 @@
 
 #include "platform.h"
 
-#ifdef PLATFORM_POSIX
+#if defined(PLATFORM_POSIX)
 #include <stdlib.h> // For NULL
 #include <stdio.h>
 #include <stdbool.h>
 
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include "int.h"
 #include "vmem.h"
+#include "file.h"
+#include "logging.h"
+
 
 // Write-tracking isn't part of POSIX, we have to rely on more OS-specific APIs
 #ifdef PLATFORM_LINUX
@@ -86,7 +90,7 @@ bool vmem_get_dirty_pages(void* addr, u64 num_pages, void** dirty_out, u64 dirty
 #endif
 
 // After this point are only standard POSIX implementations.
-
+#ifndef PLATFORM_ANDROID
 void* vmem_create_repeat_mapping(u32 ring_width, u32 repeat_count) {
     // To trick mmap() into mapping the same region to consecutive virtual
     // regions, we create a virtual (in-memory) file as a backing buffer.
@@ -128,6 +132,7 @@ void vmem_destroy_repeat_mapping(void* base_addr, u32 ring_width, u32 repeat_cou
     u64 size = ring_width * VMEM_ALLOC_GRANULARITY * repeat_count;
     munmap(base_addr, size);
 }
+#endif
 
 void* vmem_reserve(u64 size) {
     // MAP_ANONYMOUS tells it not to try to map a file into memory
@@ -155,5 +160,29 @@ int vmem_commit(void* addr, u64 size) {
 
 int vmem_free(void* addr, u64 size) {
     return munmap(addr, size);
+}
+
+void* vmem_map_file(const char* file) {
+    const long page_size = sysconf(_SC_PAGE_SIZE);
+    const s64 size = ALIGN_UP(file_size(file), page_size);
+    const int prot = PROT_READ | PROT_WRITE;
+    const int flags = MAP_PRIVATE;
+
+    const int fd = open(file, O_RDONLY);
+    if (fd == -1) {
+        return NULL;
+    }
+
+    void* result = mmap(NULL, size, prot, flags, fd, 0);
+    if (result == MAP_FAILED) {
+        LOG_MSG(error, "Failed to map file '%s' because '%s'\n", file, strerror(errno));
+        return NULL;
+    }
+
+    return result;
+}
+
+void vmem_unmap_file(void* addr, u64 size) {
+    munmap(addr, size);
 }
 #endif

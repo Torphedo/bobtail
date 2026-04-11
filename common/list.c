@@ -1,5 +1,4 @@
 #include <string.h>
-#include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
 
@@ -8,7 +7,7 @@
 #include "list.h"
 
 u32 list_maxidx(list l) {
-    return (l.alloc_size / l.element_size) - 1;
+    return list_size(l) - 1;
 }
 
 bool list_full(list l) {
@@ -16,23 +15,23 @@ bool list_full(list l) {
 }
 
 void* list_get_element(list l, u32 idx) {
-    return (void*)(l.data + (idx * l.element_size));
+    return (void*)((uintptr_t)l.buf.data + (idx * l.element_size));
 }
 
 list list_create(u32 init_size, u32 element_size) {
     return (list) {
         .element_size = element_size,
-        .data = (uintptr_t)calloc(1, init_size),
-        .alloc_size = init_size,
+        .buf = buf_create(init_size, true),
     };
 }
 
 void list_destroy(list* l) {
-    void* data = (void*)l->data;
+    buf_destroy(&l->buf);
     *l = (list){0};
+}
 
-    // This order of operations makes sure there's never a dangling pointer.
-    free((void*)data);
+u32 list_size(list l) {
+    return (l.buf.alloc_size / l.element_size);
 }
 
 void list_add(list* l, const void* data) {
@@ -40,19 +39,9 @@ void list_add(list* l, const void* data) {
     if (list_full(*l)) {
         // The buffer is completely full & needs a new allocation.
         // Grow by 50%, rounded up to the next multiple of our element size.
-        const u32 newsize = ALIGN_UP((u32)(l->alloc_size * 1.5), l->element_size);
-        assert(newsize > l->alloc_size); // Sanity check to avoid memory corruption
-        void* newbuf = calloc(1, newsize);
-        if (newbuf == NULL) {
-            LOG_MSG(error, "Couldn't expand list 0x%X -> 0x%X [alloc failure]\n", l->alloc_size, newsize);
-            return;
-        }
-
-        // Copy data & update state
-        memcpy(newbuf, (void*)l->data, l->alloc_size);
-        free((void*)l->data);
-        l->data = (uintptr_t)newbuf;
-        l->alloc_size = newsize;
+        const u32 newsize = ALIGN_UP((u32)(l->buf.alloc_size * 1.5), l->element_size);
+        assert(newsize > l->buf.alloc_size); // Sanity check to avoid memory corruption
+        buf_resize(&l->buf, newsize, true);
     }
 
     // Put value in the next slot. Sorry it's kinda verbose
@@ -78,8 +67,8 @@ void list_remove(list* l, u32 idx) {
 }
 
 void list_remove_val(list* l, const void* data) {
-    const s64 idx = list_find(*l, data);
-    if (idx == -1) {
+    const s32 idx = list_find(*l, data);
+    if (idx < 0) {
         return;
     }
     list_remove(l, idx);
@@ -92,12 +81,12 @@ void list_merge(list* dest, list src) {
     }
 }
 
-s64 list_find(list l, const void* data) {
+s32 list_find(list l, const void* data) {
     for (u32 i = 0; i < l.end_idx; i++) {
         void* element = list_get_element(l, i);
         if (memcmp(data, element, l.element_size) == 0) {
             // Found it!
-            return i;
+            return (s32)i;
         }
     }
 
@@ -110,7 +99,7 @@ bool list_contains(list l, const void* data) {
 }
 
 void list_clear(list* l) {
-    memset((void*)l->data, 0x00, l->alloc_size);
+    buf_clear(&l->buf);
     l->end_idx = 0;
 }
 

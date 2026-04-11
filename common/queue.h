@@ -1,8 +1,6 @@
-#ifndef QUEUE_H
-#define QUEUE_H
-#ifdef __cplusplus
-extern "C" {
-#endif
+#pragma once
+#include "util.h"
+EXTERN_C_BEGIN
 /// @file queue.h
 /// @brief An auto-expanding dynamic queue implementation
 ///
@@ -19,11 +17,7 @@ extern "C" {
 
 #include <stdbool.h>
 #include "int.h"
-
-// TODO: Make this structure generic like the dynamic list.
-
-/// The underlying data type used for the dynamic queue
-typedef u32 queue_element;
+#include "buffer.h"
 
 /// @brief An automatically expanding dynamic queue
 ///
@@ -34,9 +28,9 @@ typedef u32 queue_element;
 /// @sa list
 typedef struct {
     /// @brief Backing buffer
-    queue_element* data;
-    /// Current buffer size
-    u32 alloc_size;
+    buffer_t buf;
+
+    u16 element_size;
 
     /// Index of the front of the queue
     u32 front_idx;
@@ -47,7 +41,7 @@ typedef struct {
 /// @brief Create a queue.
 /// @param init_size Initial allocation size in bytes
 /// @note This allocates memory!
-queue queue_create(u32 init_size);
+queue queue_create(u32 init_size, u16 element_size);
 
 /// @brief Destroy / free a queue
 ///
@@ -58,14 +52,13 @@ void queue_destroy(queue* q);
 
 /// @brief Add an element to the back of the queue.
 /// @note If the backing buffer is full, this can allocate memory.
-void queue_add(queue* q, queue_element val);
-
+void queue_add(queue* q, const void* val);
 
 /// Return the element at the front of the queue.
-queue_element queue_peek(queue q);
+bool queue_peek(queue q, void* val_out);
 
 /// Same as @ref queue_peek, but removes the front element.
-queue_element queue_get(queue* q);
+bool queue_get(queue* q, void* val_out);
 
 /// Reset internal state and fill backing buffer with 0. Does not free buffer.
 void queue_clear(queue* q);
@@ -73,7 +66,4 @@ void queue_clear(queue* q);
 /// Check whether the queue is empty
 bool queue_empty(queue q);
 
-#ifdef __cplusplus
-}
-#endif
-#endif // #ifndef QUEUE_H
+EXTERN_C_END

@@ -1,10 +1,20 @@
 cmake_minimum_required(VERSION 3.13)
-project(bobtail C)
+project(bobtail C CXX)
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 11)
+
 # Emit a compile_commands.json for use with clangd in LSPs
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
-option(BOBTAIL_OPENGL "Include OpenGL helpers like shader compilation wrappers. Requires GLFW, GLAD, and CGLM")
+if (MSVC)
+    # Silence warnings about "unsafe" functions like fopen()
+    add_compile_definitions(_CRT_SECURE_NO_DEPRECATE)
+elseif(NOT ANDROID)
+    # For CRC32C SSE intrinsics
+    add_compile_options(-mcrc32)
+endif()
+
+option(BOBTAIL_OPENGL "Include OpenGL helpers like shader compilation wrappers. Requires GLFW and GLAD")
 option(BOBTAIL_TESTS "Build library unit tests")
 
 if (BOBTAIL_OPENGL)
@@ -14,14 +24,10 @@ if (BOBTAIL_OPENGL)
         common/gl/shader.c
 
         common/gl/input.c
-        common/gl/vector.c
-        common/gl/model.c
-        common/gl/primitives.c
     )
 endif()
 
 add_library(bobtail STATIC
-    common/int.c
     common/file.c
     common/arguments.c
     common/logging.c
@@ -29,9 +35,14 @@ add_library(bobtail STATIC
     common/crc32.c
     common/image.c
     common/path.c
+    common/vfile.c
+
+    common/buffer.c
     common/list.c
     common/queue.c
-    common/vfile.c
+    common/hashmap.c
+
+    common/parsing.c
 
     # Files for other platforms will just be empty and compile instantly
     common/vmem_posix.c
@@ -51,13 +62,17 @@ target_include_directories(bobtail PUBLIC ${bobtail_SOURCE_DIR})
 if (BOBTAIL_TESTS)
     add_executable(bobtail_test
         ${test_sources}
+        test/test_hashmap.cxx
+
         test/test_crc32.c
         test/test_queue.c
         test/test_list.c
+        test/test_hashmap.c
         test/test_vmem.c
         test/test_sha1.c
         test/main.c
+        test/test_parsing.c
     )
-    target_include_directories(bobtail_test PUBLIC ${bobtail_SOURCE_DIR})
+    target_include_directories(bobtail_test PUBLIC "${bobtail_SOURCE_DIR}/common")
     target_link_libraries(bobtail_test PRIVATE bobtail)
 endif()

@@ -53,24 +53,46 @@ bool shader_link_check(gl_obj shader) {
     return false;
 }
 
-gl_obj program_compile_src(const char* vert_src, const char* frag_src) {
+gl_obj program_compile_geo(const char* vert_src, const char* frag_src, const char* geo_src) {
     // Compile shaders
+    gl_obj geometry_shader = 0;
+    if (geo_src) {
+        geometry_shader = shader_compile_src(frag_src, GL_GEOMETRY_SHADER);
+        if (!geometry_shader) {
+            LOG_MSG(error, "Failed to compile geometry shader\n");
+            return 0;
+        }
+    }
+
     const gl_obj vertex_shader = shader_compile_src(vert_src, GL_VERTEX_SHADER);
     const gl_obj fragment_shader = shader_compile_src(frag_src, GL_FRAGMENT_SHADER);
-    if (vertex_shader == 0 || fragment_shader == 0) {
-        LOG_MSG(error, "Failed to compile shaders\n");
+
+    if (!vertex_shader || !fragment_shader) {
+        LOG_MSG(error, "Failed to compile vert and/or frag shader\n");
         return 0;
     }
     const gl_obj program = glCreateProgram();
-    glAttachShader(program, vertex_shader);
-    glAttachShader(program, fragment_shader);
-    glLinkProgram(program);
+    if (program) {
+        glAttachShader(program, vertex_shader);
+        glAttachShader(program, fragment_shader);
+        if (geo_src) {
+            glAttachShader(program, geometry_shader);
+        }
+        glLinkProgram(program);
+    } else {
+        LOG_MSG(error, "Failed to create shader program object\n");
+    }
 
     // Free the shader objects
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
+    glDeleteShader(geometry_shader);
 
     return program;
+}
+
+gl_obj program_compile_src(const char* vert_src, const char* frag_src) {
+    return program_compile_geo(vert_src, frag_src, NULL);
 }
 
 gl_obj shader_compile_src(const char* src, GLenum shader_type) {

@@ -6,16 +6,22 @@
 bool test_crc32();
 bool test_queue();
 bool test_list();
+bool test_hashmap();
+bool test_hashmap_cpp();
 bool test_vmem();
 bool test_sha1();
+bool test_parsing();
 
-typedef bool (*testproc)(void);
+typedef bool (*testproc)();
 testproc tests[] = {
     test_crc32,
     test_queue,
     test_list,
+    test_hashmap,
+    test_hashmap_cpp,
     test_vmem,
     test_sha1,
+    test_parsing,
 };
 
 int main() {
