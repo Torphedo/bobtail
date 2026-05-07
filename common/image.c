@@ -180,7 +180,12 @@ void img_write(texture img, const char* path) {
         bytes_per_pixel = img.unit_size * img.channels;
     }
 
-    const u32 tex_size = (u32)(bytes_per_pixel * pixel_count_max_mips(img.width, img.height, img.compressed));
+    u32 tex_size = 0;
+    if (img.use_mipmaps) {
+        tex_size = (u32)(bytes_per_pixel * pixel_count_max_mips(img.width, img.height, img.compressed));
+    } else {
+        tex_size = (u32)(bytes_per_pixel * img.width * img.height);
+    }
 
     if (needs_extended_header) {
         header.pixel_format.format_char_code = DDS_DX10;
