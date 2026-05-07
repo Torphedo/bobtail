@@ -254,11 +254,13 @@ void img_write(texture img, const char* path) {
         pos = ALIGN_UP(pos, alignment); // Round up to skip padding
     }
 
-    // For block-compressed cubemaps, GIMP wants 1 more block per direction than
-    // we expect, despite all directions rendering correctly... just add some
-    // padding so it doesn't crash.
-    u8 blank[6 * 16] = {0};
-    fwrite(blank, sizeof(blank), 1, out);
+    if (img.cubemap) {
+        // For block-compressed cubemaps, GIMP wants 1 more block per direction
+        // than we expect, despite all directions rendering correctly... just
+        // add some padding so it doesn't crash.
+        u8 blank[6 * 16] = {0};
+        fwrite(blank, sizeof(blank), 1, out);
+    }
     fclose(out);
 }
 
