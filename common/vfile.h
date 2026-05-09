@@ -41,6 +41,9 @@ void vfile_seek(vfile* file, u32 size);
 /// This basically just hides some pointer casts.
 void* vfile_cur(vfile file);
 
+/// @brief Get the number of bytes remaining until the end of the file
+s64 vfile_remaining(vfile file);
+
 /// @brief Read bytes into a buffer
 /// @param file The file to read from
 /// @param buf Buffer to copy data into
