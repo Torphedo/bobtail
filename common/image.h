@@ -68,7 +68,23 @@ void img_snap(texture* img, u32 size);
 /// Save an image to a DDS file
 void img_write(texture img, const char* path);
 
-/// Load a DDS from disk
+/// @brief Parse a DDS in memory
+/// @param buf The DDS data
+/// @param buf_size The size of the DDS data
+/// @param newAlloc Whether to copy the texture to a newly allocated buffer, or
+/// just store a pointer to the start of the texture in the DDS buffer. If true,
+/// the data field can be freed directly. Otherwise, you'll have to keep track
+/// of the DDS buffer's pointer separately and free that.
+/// @return The loaded texture
+texture image_load_memory(const void* buf, u32 buf_size, bool newAlloc);
+
+/// @brief Load a DDS from a file
+///
+/// You have to free the data field yourself later on.
+/// @param path The file path of the DDS
+texture image_load_file(const char* path);
+
+/// Load a DDS from disk into a fixed size buffer
 texture image_buf_load(const char* filename, u8* img_buf, u32 buf_size);
 
 EXTERN_C_END
