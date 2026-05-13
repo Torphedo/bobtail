@@ -291,7 +291,7 @@ texture image_load_memory(const void* buf, u32 buf_size, bool newAlloc) {
     dds_header header = VFILE_READ(dds_header, &vf);
 
     // Handle extended header
-    const bool has_extended_header = has_flag(header.pixel_format.flags, DDS_DX10);
+    const bool has_extended_header = header.pixel_format.format_char_code == DDS_DX10;
     dx10_extended_format extended_header = {};
     if (has_extended_header) {
         extended_header = VFILE_READ(dx10_extended_format, &vf);
