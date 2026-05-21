@@ -283,7 +283,7 @@ bool is_dds(const char* filename) {
 }
 
 texture image_load_memory(const void* buf, u32 buf_size, bool newAlloc) {
-    texture img = {};
+    texture img = {0};
 
     // We cast away const here, I pinky promise to only read from this vfile
     // - torph
@@ -292,7 +292,7 @@ texture image_load_memory(const void* buf, u32 buf_size, bool newAlloc) {
 
     // Handle extended header
     const bool has_extended_header = header.pixel_format.format_char_code == DDS_DX10;
-    dx10_extended_format extended_header = {};
+    dx10_extended_format extended_header = {0};
     if (has_extended_header) {
         extended_header = VFILE_READ(dx10_extended_format, &vf);
     }
@@ -355,7 +355,7 @@ texture image_load_memory(const void* buf, u32 buf_size, bool newAlloc) {
 }
 
 texture image_load_file(const char* path) {
-    texture out = {};
+    texture out = {0};
     void* data = vmem_map_file(path);
     const u32 size = file_size(path);
     if (!data) {
