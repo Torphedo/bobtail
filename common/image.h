@@ -87,4 +87,10 @@ texture image_load_file(const char* path);
 /// Load a DDS from disk into a fixed size buffer
 texture image_buf_load(const char* filename, u8* img_buf, u32 buf_size);
 
+/// @brief Find out the size of the image data in a DDS file in memory
+u32 image_required_size_memory(const void* buf, u32 buf_size);
+
+/// @brief Find out the size of the image data in a DDS file
+u32 image_required_size_file(const char* path);
+
 EXTERN_C_END

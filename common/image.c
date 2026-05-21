@@ -448,3 +448,31 @@ texture image_buf_load(const char* filename, u8* img_buf, u32 buf_size) {
      
     return img;
 }
+
+u32 image_required_size_memory(const void* buf, u32 buf_size) {
+    // We cast away const here, I pinky promise to only read from this vfile
+    // - torph
+    vfile vf = vfile_open((void *) buf, buf_size);
+    dds_header header = VFILE_READ(dds_header, &vf);
+
+    // Handle extended header
+    const bool has_extended_header = header.pixel_format.format_char_code == DDS_DX10;
+
+    if (has_extended_header) {
+        return buf_size - sizeof(header) - sizeof(dx10_extended_format);
+    } else {
+        return buf_size - sizeof(header);
+    }
+}
+
+u32 image_required_size_file(const char* path) {
+    void* data = vmem_map_file(path);
+    const u32 size = file_size(path);
+    if (!data) {
+        return 0;
+    }
+
+    const u32 out = image_required_size_memory(data, size);
+    vmem_unmap_file(data, size);
+    return out;
+}
