@@ -65,6 +65,13 @@ typedef struct {
 /// Round image dimensions down to some value
 void img_snap(texture* img, u32 size);
 
+/// @brief Find the total number of pixels in a texture with full mipmaps
+/// @param width The texture width
+/// @param height The texture height
+/// @param compressed If the texture is block-compressed
+/// @return The number of pixels
+u64 pixel_count_max_mips(u32 width, u32 height, bool compressed);
+
 /// Save an image to a DDS file
 void img_write(texture img, const char* path);
 
