@@ -3,12 +3,15 @@
 #include <assert.h>
 #include <memory.h>
 #include <math.h>
+#include <stdlib.h>
 
 #include "int.h"
 #include "image.h"
 #include "file.h"
 #include "logging.h"
 #include "dds.h"
+#include "vfile.h"
+#include "vmem.h"
 
 dds_header mk_header(u32 height, u32 width, bool has_mips) {
     // We add 2 to include 1x1 and 0x0 as mipmaps. This is required for cubemaps
@@ -180,7 +183,12 @@ void img_write(texture img, const char* path) {
         bytes_per_pixel = img.unit_size * img.channels;
     }
 
-    const u32 tex_size = (u32)(bytes_per_pixel * pixel_count_max_mips(img.width, img.height, img.compressed));
+    u32 tex_size = 0;
+    if (img.use_mipmaps) {
+        tex_size = (u32)(bytes_per_pixel * pixel_count_max_mips(img.width, img.height, img.compressed));
+    } else {
+        tex_size = (u32)(bytes_per_pixel * img.width * img.height);
+    }
 
     if (needs_extended_header) {
         header.pixel_format.format_char_code = DDS_DX10;
@@ -249,11 +257,13 @@ void img_write(texture img, const char* path) {
         pos = ALIGN_UP(pos, alignment); // Round up to skip padding
     }
 
-    // For block-compressed cubemaps, GIMP wants 1 more block per direction than
-    // we expect, despite all directions rendering correctly... just add some
-    // padding so it doesn't crash.
-    u8 blank[6 * 16] = {0};
-    fwrite(blank, sizeof(blank), 1, out);
+    if (img.cubemap) {
+        // For block-compressed cubemaps, GIMP wants 1 more block per direction
+        // than we expect, despite all directions rendering correctly... just
+        // add some padding so it doesn't crash.
+        u8 blank[6 * 16] = {0};
+        fwrite(blank, sizeof(blank), 1, out);
+    }
     fclose(out);
 }
 
@@ -272,6 +282,94 @@ bool is_dds(const char* filename) {
     return (magic == DDS_BEGIN);
 }
 
+texture image_load_memory(const void* buf, u32 buf_size, bool newAlloc) {
+    texture img = {};
+
+    // We cast away const here, I pinky promise to only read from this vfile
+    // - torph
+    vfile vf = vfile_open((void*)buf, buf_size);
+    dds_header header = VFILE_READ(dds_header, &vf);
+
+    // Handle extended header
+    const bool has_extended_header = header.pixel_format.format_char_code == DDS_DX10;
+    dx10_extended_format extended_header = {};
+    if (has_extended_header) {
+        extended_header = VFILE_READ(dx10_extended_format, &vf);
+    }
+
+    if (newAlloc) {
+        const s64 size = vfile_remaining(vf);
+        img.data = malloc(size);
+        if (!img.data) {
+            return img;
+        }
+        vfile_read_bytes(&vf, img.data, size);
+    }
+    img.data = vfile_cur(vf);
+
+    // Use data from the DDS as our initial texture state
+    img.width = header.width;
+    img.height = header.height;
+
+    // Only inherit the mip count if the flag in the header is set
+    img.use_mipmaps = has_flag(header.flags, DDSD_MIPMAPCOUNT);
+
+    // Presence of FOURCC flag indicates a compressed texture format
+    img.compressed = has_flag(header.pixel_format.flags, DDPF_FOURCC);
+    if (img.compressed) {
+        u32 dxt_n = header.pixel_format.format_char_code;
+        switch (dxt_n) {
+        case DDS_DXT5:
+            img.fmt = DXT3;
+            break;
+        case DDS_DXT3:
+            img.fmt = DXT5;
+            break;
+        case DDS_FLOAT:
+            img.fmt = DDS_FORMAT_FLOAT;
+            break;
+        case DDS_DX10:
+            // Format comes from extended header
+            assert(false && "DDS extended headers aren't supported yet!");
+            break;
+        default:
+            img.fmt = DXT1;
+            break;
+        };
+    } else {
+        const u8 alpha = has_flag(header.pixel_format.flags, DDPF_ALPHA);
+        const u8 alpha_pixels = has_flag(header.pixel_format.flags, DDPF_ALPHAPIXELS);
+        const u8 luminance = has_flag(header.pixel_format.flags, DDPF_LUMINANCE);
+        const u8 rgb = has_flag(header.pixel_format.flags, DDPF_RGB);
+        img.channels = alpha_pixels + alpha + luminance + (3 * rgb);
+        if (img.channels < 1 || img.channels > 4) {
+            LOG_MSG(error, "Your image has %d channels, which doesn't make sense. Double-check your pixel format flags?\n", img.channels);
+            img.channels = 1;
+            LOG_MSG(info, "I'm loading the image anyway, as if it had %d channels.\n", img.channels);
+        }
+
+        const u32 bytes_per_pixel = header.pixel_format.bits_per_pixel / 8;
+        img.unit_size = bytes_per_pixel / img.channels;
+    }
+    return img;
+}
+
+texture image_load_file(const char* path) {
+    texture out = {};
+    void* data = vmem_map_file(path);
+    const u32 size = file_size(path);
+    if (!data) {
+        return out;
+    }
+
+    out = image_load_memory(data, size, true);
+    vmem_unmap_file(data, size);
+    return out;
+}
+
+// TODO: Delete this function. It assumes you have a fixed size image buffer
+// which will always be big enough, which never really happens. It's only used
+// in an old image viewer.
 texture image_buf_load(const char* filename, u8* img_buf, u32 buf_size) {
     texture img = {
         .data = img_buf,
@@ -344,9 +442,9 @@ texture image_buf_load(const char* filename, u8* img_buf, u32 buf_size) {
             LOG_MSG(info, "I'm loading the image anyway, as if it had %d channels.\n", img.channels);
         }
 
-        img.unit_size = header.pixel_format.bits_per_pixel / 8;
+        const u32 bytes_per_pixel = header.pixel_format.bits_per_pixel / 8;
+        img.unit_size = bytes_per_pixel / img.channels;
     }
      
     return img;
 }
-

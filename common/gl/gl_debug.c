@@ -11,22 +11,22 @@ void APIENTRY gl_debug_msg(GLenum source, GLenum type, unsigned int id, GLenum s
     char* severity_str = "";
     
     switch (source) {
-    case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB:
+    case GL_DEBUG_SOURCE_SHADER_COMPILER:
         source_str = "shader compiler";
         break;
-    case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB:
+    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
         source_str = "windowing system";
         break;
-    case GL_DEBUG_SOURCE_API_ARB:
+    case GL_DEBUG_SOURCE_API:
         source_str = "API";
         break;
-    case GL_DEBUG_SOURCE_APPLICATION_ARB:
+    case GL_DEBUG_SOURCE_APPLICATION:
         source_str = "application";
         break;
-    case GL_DEBUG_SOURCE_THIRD_PARTY_ARB:
+    case GL_DEBUG_SOURCE_THIRD_PARTY:
         source_str = "third-party";
         break;
-    case GL_DEBUG_SOURCE_OTHER_ARB:
+    case GL_DEBUG_SOURCE_OTHER:
         source_str = "[other source]";
         break;
     default:
@@ -65,15 +65,15 @@ void APIENTRY gl_debug_msg(GLenum source, GLenum type, unsigned int id, GLenum s
     }
     
     switch (severity) {
-    case GL_DEBUG_SEVERITY_HIGH_ARB:
+    case GL_DEBUG_SEVERITY_HIGH:
         LOG_MSG(error, "");
         severity_str = "CRITICAL";
         break;
-    case GL_DEBUG_SEVERITY_MEDIUM_ARB:
+    case GL_DEBUG_SEVERITY_MEDIUM:
         LOG_MSG(warning, "");
         severity_str = "WARNING";
         break;
-    case GL_DEBUG_SEVERITY_LOW_ARB:
+    case GL_DEBUG_SEVERITY_LOW:
         LOG_MSG(info, "");
         severity_str = "LOW";
         break;
@@ -113,10 +113,10 @@ void gl_debug_setup() {
             // See this page for info on this flag:
             // https://www.khronos.org/opengl/wiki/Debug_Output#Getting_messages
             glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-            glDebugMessageCallbackARB(gl_debug_msg, NULL);
+            glDebugMessageCallback(gl_debug_msg, NULL);
 
             // Don't filter out any messages
-            glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+            glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
         }
         else {
             LOG_MSG(error, "It looks like we're not in a debug context...\n");
