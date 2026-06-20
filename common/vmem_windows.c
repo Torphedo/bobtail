@@ -9,6 +9,30 @@
 #include "file.h"
 #include "vmem.h"
 
+void* vmem_alloc_watched(u64 num_pages) {
+    const u64 size = num_pages * VMEM_PAGE_SIZE;
+
+    void* buf = VirtualAlloc(NULL, size, MEM_RESERVE | MEM_COMMIT | MEM_WRITE_WATCH, PAGE_READWRITE);
+    return buf;
+}
+
+bool vmem_get_dirty_pages(void* addr, u64 num_pages, void** dirty_out, u64 dirty_out_size, u64* num_dirty_out) {
+    const u64 size = num_pages * VMEM_PAGE_SIZE;
+
+    // We need a new variable since this is an in/out parameter
+    ULONG_PTR addr_count = dirty_out_size;
+
+    DWORD page_size = 0; // Output variable
+    bool res = GetWriteWatch(0, addr, size, dirty_out, &addr_count, &page_size) == 0;
+    *num_dirty_out = addr_count;
+
+    return res;
+}
+
+bool vmem_reset_write_watching(const void* buf, u64 size) {
+    return ResetWriteWatch((void*)buf, size) == 0;
+}
+
 // Non-thread-safe version that may have to be retried a few times if a race
 // condition causes a mapping to fail. This is the only option if
 // VirtualAlloc2() and MapViewOfFile3() aren't available. Fabian Giesen's post
