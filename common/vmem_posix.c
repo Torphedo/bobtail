@@ -5,15 +5,165 @@
 #if defined(PLATFORM_POSIX)
 #include <stdlib.h> // For NULL
 #include <stdio.h>
+#include <stdbool.h>
+
+#include <sys/mman.h>
+#include <sys/syscall.h>
+#include <linux/userfaultfd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/ioctl.h>
+#include <linux/fs.h>
+
 #include "int.h"
 #include "vmem.h"
 #include "file.h"
 #include "logging.h"
 
-#include <sys/mman.h>
-#include <fcntl.h>
-#include <errno.h>
 
+// Write-tracking isn't part of POSIX, we have to rely on more OS-specific APIs
+#ifdef PLATFORM_LINUX
+
+enum {
+    // https://www.man7.org/linux/man-pages/man5/proc_pid_pagemap.5.html
+    PAGE_FLAG_UFFD_WRITE_PROTECTED = 57,
+};
+
+#define GET_BIT(x, y) ((x & ((uint64_t)1 << y)) >> y)
+
+static int user_fault_fd = -1;
+
+int vmem_get_uffd() {
+    if (user_fault_fd >= 0) {
+        return user_fault_fd;
+    }
+
+    user_fault_fd = syscall(SYS_userfaultfd, UFFD_USER_MODE_ONLY);
+    if (user_fault_fd < 0) {
+        return user_fault_fd;
+    }
+
+    struct uffdio_api api = {
+        .api = UFFD_API,
+        .features = UFFD_FEATURE_WP_ASYNC,
+    };
+    ioctl(user_fault_fd, UFFDIO_API, &api);
+    if (!(api.features & UFFD_FEATURE_WP_ASYNC)) {
+        LOG_MSG(warning, "Write tracking is not automatically handled by the kernel, there may be problems!\n");
+    }
+
+    return user_fault_fd;
+}
+
+bool vmem_reset_write_watching(const void* buf, u64 size) {
+    const uintptr_t end = (uintptr_t)buf + size;
+
+    int f = open("/proc/self/pagemap", O_RDONLY);
+    if (f < 0) {
+        return false;
+    }
+
+    // Write-protect pages that have been written to
+    struct pm_scan_arg args = {
+        .start = (uintptr_t)buf,
+        .size = sizeof(args),
+        .end = end,
+        .flags = PM_SCAN_WP_MATCHING,
+        .category_mask = PAGE_IS_WRITTEN,
+    };
+    if (ioctl(f, PAGEMAP_SCAN, &args) != 0) {
+        return false;
+    }
+
+    close(f);
+    return true;
+}
+
+void* vmem_alloc_watched(u64 num_pages) {
+    // Since we can get dirty state of any page on Linux and reserved memory is
+    // immediately usable, there's nothing special to do here. This function
+    // exists just for consistency in user code.
+    const int uffd = vmem_get_uffd();
+    if (uffd < 0) {
+        return NULL;
+    }
+
+    const u64 size = num_pages * VMEM_PAGE_SIZE;
+    void* buf = vmem_reserve(size);
+    if (!buf) {
+        return buf;
+    }
+
+    struct uffdio_register reg = {
+        .range = {
+            .start = (uintptr_t) buf,
+            .len = size,
+        },
+        .mode = UFFDIO_REGISTER_MODE_WP,
+    };
+    if (ioctl(uffd, UFFDIO_REGISTER, &reg) != 0) {
+        LOG_MSG(error, "Failed to register %d-byte memory region!\n", size);
+        vmem_free(buf, size);
+        return NULL;
+    }
+
+    struct uffdio_writeprotect wp = {
+        .range = {
+            .start = (uintptr_t) buf,
+            .len = size,
+        },
+        .mode = UFFDIO_WRITEPROTECT_MODE_WP,
+    };
+    if (ioctl(uffd, UFFDIO_WRITEPROTECT, &wp) != 0) {
+        LOG_MSG(error, "Failed to register %d-byte memory region!\n", size);
+        vmem_free(buf, size);
+        return NULL;
+    }
+
+    vmem_reset_write_watching(buf, size);
+    return buf;
+}
+
+bool vmem_get_dirty_pages(void* addr, u64 num_pages, void** dirty_out, u64 dirty_out_size, u64* num_dirty_out) {
+    FILE* f = fopen("/proc/self/pagemap", "rb");
+    const u64 page_num = ((uintptr_t)addr / getpagesize());
+    if (fseek(f, page_num * sizeof(u64), SEEK_SET)) {
+        // Some seek failure??
+        return false;
+    }
+    *num_dirty_out = 0;
+
+    // No bounds checking is needed inside the loop because our loop boundary
+    // accounts for user array size.
+    for (u64 i = 0; i < MIN(num_pages, dirty_out_size); i++) {
+        // We assume the page is dirty until told otherwise, better safe than sorry.
+        bool is_dirty = true;
+
+        // Read page flags
+        uint64_t flags = 0;
+        if (fread(&flags, sizeof(flags), 1, f) == 1) {
+            // Pages are write-protected until written to, at which point the
+            // kernel marks it as written and removes the protection
+            is_dirty = !GET_BIT(flags, PAGE_FLAG_UFFD_WRITE_PROTECTED);
+        }
+
+        if (is_dirty) {
+            // Save the address to the output array
+            void* dirty_addr = (u8*)addr + (i * VMEM_PAGE_SIZE);
+            dirty_out[i] = dirty_addr;
+            // I'm just not going to bother remembering the correct order of
+            // parentheses needed to do this with a "++".
+            *num_dirty_out = *num_dirty_out + 1;
+        }
+    }
+
+    fclose(f);
+    return true;
+}
+
+#endif
+
+// After this point are only standard POSIX implementations.
 #ifndef PLATFORM_ANDROID
 void* vmem_create_repeat_mapping(u32 ring_width, u32 repeat_count) {
     // To trick mmap() into mapping the same region to consecutive virtual
@@ -110,4 +260,3 @@ void vmem_unmap_file(void* addr, u64 size) {
     munmap(addr, size);
 }
 #endif
-

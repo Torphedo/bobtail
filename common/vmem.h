@@ -14,9 +14,43 @@ EXTERN_C_BEGIN
 #include "int.h"
 
 enum {
+    // TODO: Add a function to get the page size and/or convert a size in bytes
+    // to a number of pages. Everything's 4KB pages right now, but we really
+    // ought to be asking the OS at runtime.
     VMEM_PAGE_SIZE = 4 * 1024,
     VMEM_ALLOC_GRANULARITY = 64 * 1024,
 };
+
+/// @brief Allocate a region of memory that can be watched for writes by the OS.
+///
+/// On Linux, any arbitrary region of pages can be watched. However, we're
+/// locked into this allocation-based API because of Windows' implementation.
+///
+/// This function will try its best to use as little physical memory as
+/// possible for the allocation, so your memory usage might not increase by the
+/// allocated amount until you write to every page in the region at least once.
+///
+/// @param num_pages How many pages to allocate (size in bytes will be [num_pages] * @ref VMEM_PAGE_SIZE)
+/// @return Address of the allocated region, or NULL on failure
+void* vmem_alloc_watched(u64 num_pages);
+
+/// @brief Find out which pages have changed (are "dirty") since the last time write-tracking was reset
+///
+/// This is essentially a more portable GetWriteWatch() API.
+/// @param addr The base address of the region to check for changes in
+/// @param num_pages The number of pages to check for changes
+/// @param dirty_out A pointer to an array that receives dirty page pointers
+/// @param dirty_out_size The size of the array to receive dirty page pointers
+/// @param num_dirty_out Receives the number of dirty page pointers written to the output array
+/// @return success/failure
+bool vmem_get_dirty_pages(void* addr, u64 num_pages, void** dirty_out, u64 dirty_out_size, u64* num_dirty_out);
+
+/// @brief Reset dirty page tracking for all pages in the current process.
+///
+/// @param buf The start of the memory region
+/// @param size The size of the memory region
+/// @return Whether the reset succeeded
+bool vmem_reset_write_watching(const void* buf, u64 size);
 
 /// @brief Create a special mapping that looks like a large linear buffer but acts like a tiny circular buffer
 ///
@@ -54,6 +88,7 @@ void vmem_destroy_repeat_mapping(void* base_addr, u32 ring_width, u32 repeat_cou
 /// vmem_commit(). You may be able to use the region without errors on some
 /// systems, but this isn't portable or guaranteed.
 /// @return Pointer to reserved region, or NULL on failure
+// TODO: Add an option to make the entire region immediately usable, at the cost of reserving page file space
 // TODO: Look into writing a page fault handler on Windows to auto-commit reserved pages as needed
 void* vmem_reserve(u64 size);
 
