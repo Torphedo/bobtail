@@ -47,13 +47,10 @@ bool vmem_get_dirty_pages(void* addr, u64 num_pages, void** dirty_out, u64 dirty
 
 /// @brief Reset dirty page tracking for all pages in the current process.
 ///
-/// Because of limitations on Linux, it's not possible to reset tracking for
-/// just one region. You should check all of your monitored regions and ensure
-/// no threads are about to write to them before calling this function,
-/// otherwise you may miss a write.
-// TODO: Is there even a practical way to clear all write watches for the
-// process on Windows? Can we work around this on Linux and clear per region?
-bool vmem_reset_write_watching();
+/// @param buf The start of the memory region
+/// @param size The size of the memory region
+/// @return Whether the reset succeeded
+bool vmem_reset_write_watching(const void* buf, u64 size);
 
 /// @brief Create a special mapping that looks like a large linear buffer but acts like a tiny circular buffer
 ///

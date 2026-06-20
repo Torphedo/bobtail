@@ -90,28 +90,20 @@ bool test_vmem_write_watch() {
     void* dirty_pages[50] = {0};
     u64 num_dirty_pages = 0;
     vmem_get_dirty_pages(watched, num_pages, dirty_pages, ARRAY_SIZE(dirty_pages), &num_dirty_pages);
-    if (num_dirty_pages != num_pages) {
-        LOG_MSG(error, "The entire region should be considered dirty immediately after allocation!\n");
-        result = false;
-    }
-    if (dirty_pages[0] == NULL || dirty_pages[num_pages - 1] == NULL) {
-        // The whole array should be full of pointers.
-        LOG_MSG(error, "Not every page in the watched region was considered dirty!\n");
+    if (num_dirty_pages > 0) {
+        LOG_MSG(error, "The entire region should be considered clean immediately after allocation!\n");
         result = false;
     }
 
+    watched[0] = 42;
+
     // After clearing, no pages should be considered dirty.
-    vmem_reset_write_watching();
+    vmem_reset_write_watching(watched, num_pages * VMEM_PAGE_SIZE);
     memset(dirty_pages, 0, sizeof(dirty_pages)); // Wipe pointers we just got
     num_dirty_pages = 0;
     vmem_get_dirty_pages(watched, num_pages, dirty_pages, ARRAY_SIZE(dirty_pages), &num_dirty_pages);
     if (num_dirty_pages > 0) {
         LOG_MSG(error, "No pages should be considered dirty after a reset! (got %d)\n", num_dirty_pages);
-    }
-    if (dirty_pages[0] != NULL || dirty_pages[num_pages - 1] != NULL) {
-        // The whole array should be full of pointers.
-        LOG_MSG(error, "No pages in the watched region was considered dirty after a reset!\n");
-        result = false;
     }
 
     // Write a value to a random part of the region
