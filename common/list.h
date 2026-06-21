@@ -54,6 +54,10 @@ void list_destroy(list* l);
 /// @param l List to query
 u32 list_size(list l);
 
+/// @brief Find out how many elements the list has space allocated for
+/// @param l List to query
+u32 list_reserve_size(list l);
+
 /// @brief Append an element to the list.
 /// @param l The list to modify
 /// @param data The data to append. Must be at least @ref list.element_size

@@ -31,6 +31,10 @@ void list_destroy(list* l) {
 }
 
 u32 list_size(list l) {
+    return l.end_idx;
+}
+
+u32 list_reserve_size(list l) {
     return (l.buf.alloc_size / l.element_size);
 }
 
