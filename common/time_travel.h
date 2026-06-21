@@ -41,18 +41,19 @@ void tt_restore_state_relative(tt_region* region, s32 diff);
 // Get the current state ID
 s32 tt_current_state(const tt_region* region);
 
-
-
 // Make the given state the last one, wipe all states that come after
 void tt_make_last_state(tt_region* region, s32 state);
 
 bool tt_is_state_first(tt_region* region, s32 state);
 bool tt_is_state_last(tt_region* region, s32 state);
 
+u32 tt_state_count(const tt_region* region);
+
+
 // Snapshot ID increments on state changes and repeats
 // Hard to know if a full replay is needed unless we track the starting
 // snapshot ID at each state
 void tt_restore_snapshot(tt_region* region, s32 snapshot);
 
-u32 tt_snapshot_count(tt_region* region);
+u32 tt_snapshot_count(const tt_region* region);
 

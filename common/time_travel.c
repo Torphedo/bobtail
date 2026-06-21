@@ -1,6 +1,7 @@
 /// @author Torphedo
 #include "time_travel.h"
 #include <stdlib.h>
+#include <assert.h>
 #include "vmem.h"
 
 
@@ -54,7 +55,7 @@ tt_state_diff* tt_get_state(tt_region* region, s32 id) {
     if (id == 0) {
         return NULL;
     }
-    return *(tt_state_diff**)list_get_element(region->states, id);
+    return *(tt_state_diff**)list_get_element(region->states, id - 1);
 }
 
 s32 tt_last_state(const tt_region* region) {
@@ -64,7 +65,7 @@ s32 tt_last_state(const tt_region* region) {
 /// Advance the state by 1
 void tt_snapshot_advance(tt_region* region) {
     const s32 target = region->cur_state + 1;
-    if (target >= list_size(region->states)) {
+    if (target >= tt_state_count(region)) {
         return; // Nothing to advance to
     }
 
@@ -104,11 +105,12 @@ tt_region tt_allocate(u64 size) {
         .buf = vmem_alloc_watched(num_pages),
     };
 
-    list_create(10, sizeof(tt_state_diff*));
+    out.states = list_create(10, sizeof(tt_state_diff*));
+    return out;
 }
 
 void tt_destroy(tt_region* region) {
-    for (u32 i = 0; i < list_size(region->states); i++) {
+    for (u32 i = 1; i < list_size(region->states); i++) {
         tt_state_diff* diff = tt_get_state(region, i);
         tt_state_destroy(diff);
     }
@@ -120,6 +122,8 @@ void tt_destroy(tt_region* region) {
 
 s32 tt_snapshot(tt_region* region) {
     if (!region->state_base) {
+        assert(region->cur_state == 0);
+
         // Copy the entire region as an initial state we can diff against
         region->state_base = malloc(region->size);
         if (!region->state_base) {
@@ -127,7 +131,7 @@ s32 tt_snapshot(tt_region* region) {
         }
         memcpy(region->state_base, region->buf, region->size);
         vmem_reset_write_watching(region->buf, region->size);
-        return 0;
+        return region->cur_state++;
     }
 
     const u64 num_pages = vmem_size_to_pages(region->size);
@@ -148,6 +152,7 @@ s32 tt_snapshot(tt_region* region) {
     const u32 idx = list_size(region->states);
     tt_state_diff* diff = tt_state_allocate(dirty_pages, num_dirty);
     list_add(&region->states, &diff);
+    region->cur_state++;
 
     vmem_reset_write_watching(region->buf, region->size);
     return idx;
@@ -199,6 +204,10 @@ bool tt_is_state_last(tt_region* region, s32 state) {
     return state == tt_last_state(region);
 }
 
+u32 tt_state_count(const tt_region* region) {
+    return tt_last_state(region) + (region->state_base != NULL);
+}
+
 void tt_restore_snapshot(tt_region* region, s32 snapshot) {
     const s32 state = tt_snapshot_to_state(region, snapshot);
     if (state >= 0) {
@@ -206,10 +215,10 @@ void tt_restore_snapshot(tt_region* region, s32 snapshot) {
     }
 }
 
-u32 tt_snapshot_count(tt_region* region) {
-    u32 count = 0;
-    for (s32 i = 0; i < list_size(region->states); i++) {
-        const tt_state_diff* diff = tt_get_state(region, i);
+u32 tt_snapshot_count(const tt_region* region) {
+    u32 count = (region->state_base != NULL);
+    for (s32 i = 1; i < tt_state_count(region); i++) {
+        const tt_state_diff* diff = tt_get_state((tt_region*)region, i);
         if (diff) {
             count += diff->repeat_count;
         }

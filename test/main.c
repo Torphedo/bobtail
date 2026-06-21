@@ -11,6 +11,7 @@ bool test_hashmap_cpp();
 bool test_vmem();
 bool test_sha1();
 bool test_parsing();
+bool test_time_travel();
 
 typedef bool (*testproc)();
 testproc tests[] = {
@@ -22,6 +23,7 @@ testproc tests[] = {
     test_vmem,
     test_sha1,
     test_parsing,
+    test_time_travel,
 };
 
 int main() {

@@ -71,8 +71,9 @@ if (BOBTAIL_TESTS)
         test/test_hashmap.c
         test/test_vmem.c
         test/test_sha1.c
-        test/main.c
         test/test_parsing.c
+        test/test_time_travel.c
+        test/main.c
     )
     target_include_directories(bobtail_test PUBLIC "${bobtail_SOURCE_DIR}/common")
     target_link_libraries(bobtail_test PRIVATE bobtail)
