@@ -44,6 +44,8 @@ s32 tt_current_state(const tt_region* region);
 // Make the given state the last one, wipe all states that come after
 void tt_make_last_state(tt_region* region, s32 state);
 
+s32 tt_last_state(const tt_region* region);
+
 bool tt_is_state_first(tt_region* region, s32 state);
 bool tt_is_state_last(tt_region* region, s32 state);
 

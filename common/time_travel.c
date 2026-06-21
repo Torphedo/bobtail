@@ -159,6 +159,7 @@ s32 tt_snapshot(tt_region* region) {
 }
 
 void tt_restore_state(tt_region* region, s32 state) {
+    state = MAX(0, state);
     if (state == region->cur_state) {
         return; // Nothing to do
     }
