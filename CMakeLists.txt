@@ -43,6 +43,7 @@ add_library(bobtail STATIC
     common/hashmap.c
 
     common/parsing.c
+    common/time_travel.c
 
     # Files for other platforms will just be empty and compile instantly
     common/vmem_posix.c

@@ -119,4 +119,12 @@ void* vmem_map_file(const char* file);
 /// @param size Size of the mapped buffer
 void vmem_unmap_file(void* addr, u64 size);
 
+u32 vmem_get_page_size() {
+    return VMEM_PAGE_SIZE;
+}
+
+u64 vmem_size_to_pages(u64 size) {
+    return (size / vmem_get_page_size()) + 1;
+}
+
 EXTERN_C_END
