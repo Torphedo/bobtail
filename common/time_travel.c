@@ -136,7 +136,7 @@ s32 tt_snapshot(tt_region* region) {
 
     const u64 num_pages = vmem_size_to_pages(region->size);
     u64 num_dirty = 0;
-    void* dirty_pages[DIRTY_MAX] = {};
+    void* dirty_pages[DIRTY_MAX] = {0};
     vmem_get_dirty_pages(region->buf, num_pages, dirty_pages, ARRAY_SIZE(dirty_pages), &num_dirty);
     if (num_dirty == 0) {
         // Nothing has changed.
