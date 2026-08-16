@@ -10,8 +10,7 @@ repo, here's a quick overview:
   - Simple wrappers around `stat` and `stdio.h`, useful for when you want
   something simple done with less boilerplate.
   - Read entire file [into a new or existing buffer]
-  - File size at a path
-  - "is a file/directory" checks
+  - File size at a path, "is a file/directory" checks
 
 
 - Endian Handling [`common/endian.h`]
@@ -25,6 +24,7 @@ repo, here's a quick overview:
     A different implementation is compiled depending on the platform, but the
     API's behaviour is almost identical on all platforms.
   - Reserve/commit API similar to `VirtualAlloc`
+  - Write-tracking via page dirty bits exposed by the OS
   - "[Magic](https://fgiesen.wordpress.com/2012/07/21/the-magic-ring-buffer/)"
     Ring Buffer that looks and acts like one, but is laid out in memory like a
     normal linear buffer. It can be seamlessly passed into code that expects a
@@ -33,6 +33,10 @@ repo, here's a quick overview:
     on POSIX, but the API uses 64K for consistency with Windows). Not available on
     Nintendo Switch.
 
+- Time Travel [`common/time_travel.h`]
+  - Uses write-tracking to take snapshots of a memory region with very low
+    memory overhead
+  - Can be used to easily implement undo/redo
 
 - "Virtual Files" [`common/vfile.h`]
   - `stdio`-style API that acts on buffers instead of files.
